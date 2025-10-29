@@ -1,0 +1,23 @@
+<?php
+return [
+    'tenggarong'          => '431.2.64.02.01',
+    'loa kulu'            => '431.2.64.02.02',
+    'loa janan'           => '431.2.64.02.03',
+    'tenggarong seberang' => '431.2.64.02.04',
+    'sebulu'              => '431.2.64.02.05',
+    'samboja'             => '431.2.64.02.06',
+    'muara jawa'          => '431.2.64.02.07',
+    'sangasanga'          => '431.2.64.02.08',
+    'anggana'             => '431.2.64.02.09',
+    'muara badak'         => '431.2.64.02.10',
+    'marangkayu'          => '431.2.64.02.11',
+    'kota bangun'         => '431.2.64.02.12',
+    'muara kaman'         => '431.2.64.02.13',
+    'muara wis'           => '431.2.64.02.14',
+    'muara muntai'        => '431.2.64.02.15',
+    'kembang janggut'     => '431.2.64.02.16',
+    'kenohan'             => '431.2.64.02.17',
+    'tabang'              => '431.2.64.02.18',
+    'kota bangun darat'   => '431.2.64.02.19',
+    'samboja barat'       => '431.2.64.02.20',
+];

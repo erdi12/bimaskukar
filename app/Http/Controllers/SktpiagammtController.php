@@ -1,0 +1,798 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Log;
+use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
+use App\Models\Kecamatan;
+use App\Models\Sktpiagammt;
+use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Routing\Controller;
+use Spatie\Browsershot\Browsershot;
+use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Storage;
+
+class SktpiagammtController extends Controller
+{
+    private const UPLOAD_PATH = [
+        'skt' => 'app/public/skt',
+        'piagam' => 'app/public/piagam',
+        'berkas' => 'app/public/berkas'
+    ];
+
+    /**
+     * Handle file upload for SKT, Piagam, and Berkas
+     *
+     * @param \Illuminate\Http\UploadedFile $file
+     * @param string $type
+     * @param string|null $oldFile
+     * @return string
+     */
+    private function handleFileUpload($file, $type, $oldFile = null)
+    {
+        // Hapus file lama jika ada
+        if ($oldFile && file_exists(storage_path(self::UPLOAD_PATH[$type] . '/' . $oldFile))) {
+            unlink(storage_path(self::UPLOAD_PATH[$type] . '/' . $oldFile));
+        }
+        
+        // Sanitasi dan generate nama file baru
+        $fileName = time() . '_' . preg_replace('/[^A-Za-z0-9\-.]/', '', $file->getClientOriginalName());
+        
+        // Pastikan direktori ada
+        $path = storage_path(self::UPLOAD_PATH[$type]);
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
+        }
+        
+        // Upload file
+        $file->move($path, $fileName);
+        
+        return $fileName;
+    }
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        // Ambil data yang diperlukan
+        $kecamatans = \App\Models\Kecamatan::all();
+        $kelurahans = collect(); // Default kosong, akan diisi saat filter
+        
+        // Query dasar
+        $query = \App\Models\Sktpiagammt::with(['kecamatan', 'kelurahan']);
+        
+        // Filter berdasarkan request
+        if (request()->has('kecamatan_id') && request('kecamatan_id')) {
+            $query->where('kecamatan_id', request('kecamatan_id'));
+            // Load kelurahan untuk dropdown
+            $kelurahans = \App\Models\Kelurahan::where('kecamatan_id', request('kecamatan_id'))->get();
+        }
+        
+        if (request()->has('kelurahan_id') && request('kelurahan_id')) {
+            $query->where('kelurahan_id', request('kelurahan_id'));
+        }
+        
+        // Ambil semua data
+        $sktpiagammts = $query->orderBy('created_at', 'desc')->get();
+        
+        return view('backend.skt_piagam_mt.index', compact('sktpiagammts', 'kecamatans', 'kelurahans'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $kecamatans = Kecamatan::all();
+        return view('backend.skt_piagam_mt.create', compact('kecamatans'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // Cek apakah nomor statistik sudah ada di database
+        $existingNomorStatistik = Sktpiagammt::where('nomor_statistik', $request->nomor_statistik)->first();
+        if ($existingNomorStatistik) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['nomor_statistik' => 'Nomor Statistik Sudah Ada']);
+        }
+        
+        $validated = $request->validate([
+            'nomor_statistik' => 'required|unique:sktpiagammts,nomor_statistik',
+            'nama_majelis' => 'required',
+            'alamat' => 'required',
+            'kecamatan_id' => 'required|exists:kecamatans,id',
+            'kelurahan_id' => 'required|exists:kelurahans,id',
+            'tanggal_berdiri' => 'required|date',
+            'status' => 'required|in:aktif,nonaktif',
+            'ketua' => 'required',
+            'no_hp' => 'required',
+            'mendaftar' => 'required|date',
+            'mendaftar_ulang' => 'required|date',
+        ]);
+
+        Sktpiagammt::create($validated);
+
+        Alert::success('Success', 'Data Majelis Ta\'lim berhasil ditambahkan.');
+
+        return redirect()->route('skt_piagam_mt.index');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $sktpiagammt = Sktpiagammt::findOrFail($id);
+        $kecamatans = Kecamatan::all();
+        return view('backend.skt_piagam_mt.edit', compact('sktpiagammt', 'kecamatans'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $sktpiagammt = Sktpiagammt::findOrFail($id);
+        
+        $validated = $request->validate([
+            'nomor_statistik' => 'required|unique:sktpiagammts,nomor_statistik,'.$id,
+            'nama_majelis' => 'required',
+            'alamat' => 'required',
+            'kecamatan_id' => 'required|exists:kecamatans,id',
+            'kelurahan_id' => 'required|exists:kelurahans,id',
+            'tanggal_berdiri' => 'required|date',
+            'status' => 'required|in:aktif,nonaktif',
+            'ketua' => 'required',
+            'no_hp' => 'required',
+            'mendaftar' => 'required|date',
+            'mendaftar_ulang' => 'required|date',
+        ]);
+
+        $sktpiagammt->update($validated);
+
+        Alert::success('Success', 'Data Majelis Ta\'lim berhasil diperbarui.');
+
+        return redirect()->route('skt_piagam_mt.index');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        try {
+            $sktpiagammt = Sktpiagammt::findOrFail($id);
+            $nama = $sktpiagammt->nama_majelis;
+            
+            // Hapus file SKT jika ada
+            if ($sktpiagammt->file_skt && file_exists(storage_path('app/public/skt/' . $sktpiagammt->file_skt))) {
+                unlink(storage_path('app/public/skt/' . $sktpiagammt->file_skt));
+            }
+            
+            // Hapus file Piagam jika ada
+            if ($sktpiagammt->file_piagam && file_exists(storage_path('app/public/piagam/' . $sktpiagammt->file_piagam))) {
+                unlink(storage_path('app/public/piagam/' . $sktpiagammt->file_piagam));
+            }
+            
+            // Hapus file Berkas jika ada
+            if ($sktpiagammt->file_berkas && file_exists(storage_path('app/public/berkas/' . $sktpiagammt->file_berkas))) {
+                unlink(storage_path('app/public/berkas/' . $sktpiagammt->file_berkas));
+            }
+            
+            $sktpiagammt->delete();
+            
+            // Menggunakan Alert facade untuk menampilkan notifikasi sukses
+            Alert::success('Berhasil', "Data Majelis Ta'lim '$nama' berhasil dihapus.");
+            
+            return redirect()->route('skt_piagam_mt.index');
+        } catch (\Exception $e) {
+            // Menggunakan Alert facade untuk menampilkan notifikasi error
+            Alert::error('Gagal', 'Gagal menghapus data. ' . $e->getMessage());
+            
+            return redirect()->route('skt_piagam_mt.index');
+        }
+    }
+
+    public function cetakPiagam($id)
+    {
+        try {
+            $sktpiagammt = Sktpiagammt::findOrFail($id);
+            $logoPath = public_path('images/kemenag/kemenag.png');
+            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            // di Controller
+            $fontPath = public_path('fonts/imprint-mt-shadow.ttf');
+            $fontData = base64_encode(file_get_contents($fontPath));
+
+            
+            // Tambahkan variabel yang diperlukan untuk template
+            
+            // Render view ke HTML dengan semua variabel yang diperlukan
+            $html = view('backend.skt_piagam_mt.cetak_piagam', compact(
+                'sktpiagammt', 'logoBase64', 'fontData'))->render();
+            
+            // Simpan HTML ke file temporary dengan path absolut
+            $tempPath = storage_path('app/public/temp');
+            if (!file_exists($tempPath)) {
+                mkdir($tempPath, 0755, true);
+            }
+            
+            $tempFile = $tempPath . '/skt_' . time() . '.html';
+            file_put_contents($tempFile, $html);
+            
+            // Generate PDF dengan Browsershot dengan konfigurasi lebih detail
+            $pdf = Browsershot::html(file_get_contents($tempFile))
+                ->format('A4')
+                ->margins(10, 10, 10, 10) // Tambahkan margin untuk mencegah konten menyentuh bingkai
+                ->showBackground()
+                ->waitUntilNetworkIdle()
+                ->timeout(120)
+                ->pdf();
+                
+            // Hapus file temporary
+            @unlink($tempFile);
+            
+            // Kembalikan respons PDF dengan header yang benar
+            // Buat nama file yang sesuai format: "nomor_statistik - nama_majelis - SKT"
+            $fileName = $sktpiagammt->nomor_statistik . ' - ' . $sktpiagammt->nama_majelis . ' - Piagam.pdf';
+            // Bersihkan karakter yang tidak valid untuk nama file
+            $fileName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $fileName);
+            
+            return response($pdf)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
+                
+        } catch (\Exception $e) {
+            // Log error
+            \Log::error('PDF Generation Error: ' . $e->getMessage());
+            
+            // Tampilkan pesan error yang lebih informatif
+            return response()->view('errors.custom', [
+                'message' => 'Gagal membuat PDF: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
+
+    public function cetakSkt($id, Request $request)
+    {
+        try {
+            $sktpiagammt = Sktpiagammt::with(['kecamatan', 'kelurahan'])->findOrFail($id);
+            $logoPath = public_path('images/kemenag/kemenag.png');
+            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            
+            // Ambil tipe wilayah dari request, default ke 'kelurahan' jika tidak ada
+            $tipeWilayah = $request->query('tipe', 'kelurahan');
+            
+            // Tambahkan variabel yang diperlukan untuk template
+            
+            // Render view ke HTML dengan semua variabel yang diperlukan
+            $html = view('backend.skt_piagam_mt.cetak_skt', compact(
+                'sktpiagammt', 'logoBase64', 'tipeWilayah'))->render();
+            
+            // Simpan HTML ke file temporary dengan path absolut
+            $tempPath = storage_path('app/public/temp');
+            if (!file_exists($tempPath)) {
+                mkdir($tempPath, 0755, true);
+            }
+            
+            $tempFile = $tempPath . '/skt_' . time() . '.html';
+            file_put_contents($tempFile, $html);
+            
+            // Generate PDF dengan Browsershot dengan konfigurasi lebih detail
+            $pdf = Browsershot::html(file_get_contents($tempFile))
+                ->format('A4')
+                ->margins(10, 10, 10, 10) // Tambahkan margin untuk mencegah konten menyentuh bingkai
+                ->showBackground()
+                ->waitUntilNetworkIdle()
+                ->timeout(120)
+                ->pdf();
+                
+            // Hapus file temporary
+            @unlink($tempFile);
+            
+            // Kembalikan respons PDF dengan header yang benar
+            // Buat nama file yang sesuai format: "nomor_statistik - nama_majelis - SKT"
+            $fileName = $sktpiagammt->nomor_statistik . ' - ' . $sktpiagammt->nama_majelis . ' - SKT.pdf';
+            // Bersihkan karakter yang tidak valid untuk nama file
+            $fileName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $fileName);
+            
+            return response($pdf)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
+                
+        } catch (\Exception $e) {
+            // Log error
+            \Log::error('PDF Generation Error: ' . $e->getMessage());
+            
+            // Tampilkan pesan error yang lebih informatif
+            return response()->view('errors.custom', [
+                'message' => 'Gagal membuat PDF: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
+
+    /**
+     * Mendapatkan kelurahan berdasarkan kecamatan
+     */
+    public function getKelurahan(Request $request)
+    {
+        try {
+            $kecamatanId = $request->get('kecamatan_id');
+
+            if (!$kecamatanId) {
+                return response()->json(['error' => 'ID Kecamatan tidak ditemukan'], 400);
+            }
+
+            // Ambil kelurahan berdasarkan kecamatan_id
+            $kelurahans = \App\Models\Kelurahan::where('kecamatan_id', $kecamatanId)
+                ->select('id', 'nama_kelurahan') // hanya ambil kolom yang diperlukan
+                ->orderBy('nama_kelurahan')
+                ->get();
+
+            return response()->json($kelurahans);
+        } catch (\Exception $e) {
+            \Log::error('Error getKelurahan: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal mengambil data kelurahan'], 500);
+        }
+    }
+
+        
+        /**
+         * Mendapatkan nomor statistik berikutnya berdasarkan kecamatan
+         */
+    public function getNextNomorStatistik(Request $request)
+    {
+        try {
+            $kecamatanId = $request->kecamatan_id;
+
+            if (!$kecamatanId) {
+                return response()->json(['error' => 'ID Kecamatan tidak ditemukan'], 400);
+            }
+
+            // Ambil data kecamatan
+            $kecamatan = \App\Models\Kecamatan::findOrFail($kecamatanId);
+
+            // Normalisasi nama kecamatan biar cocok sama config
+            $namaKecamatan = strtolower(trim($kecamatan->kecamatan));
+
+            // Ambil kode kecamatan dari file konfigurasi
+            $kodeKecamatanConfig = config('nomor_statistik.' . $namaKecamatan);
+
+            if (!$kodeKecamatanConfig) {
+                // Fallback jika tidak ada di konfigurasi
+                $kodeKecamatan = str_pad($kecamatan->id, 2, '0', STR_PAD_LEFT);
+                $kodeKecamatanPrefix = "431.2.64.02.{$kodeKecamatan}";
+                \Log::warning("Kode kecamatan untuk '{$namaKecamatan}' tidak ditemukan di konfigurasi. Menggunakan fallback: {$kodeKecamatanPrefix}");
+            } else {
+                $kodeKecamatanPrefix = $kodeKecamatanConfig;
+            }
+
+            // Cari nomor statistik terakhir untuk kecamatan ini
+            $lastNumber = \App\Models\Sktpiagammt::where('nomor_statistik', 'like', "{$kodeKecamatanPrefix}.%")
+                                ->orderByRaw('CAST(SUBSTRING_INDEX(nomor_statistik, ".", -1) AS UNSIGNED) DESC')
+                                ->value('nomor_statistik');
+
+            if ($lastNumber) {
+                // Ambil angka terakhir dan tambahkan 1
+                $parts = explode('.', $lastNumber);
+                $lastPart = end($parts);
+                $nextNumber = str_pad((int)$lastPart + 1, 3, '0', STR_PAD_LEFT);
+            } else {
+                // Jika belum ada nomor untuk kecamatan ini, mulai dari 001
+                $nextNumber = '001';
+            }
+
+            // Format nomor statistik lengkap
+            $nomorStatistik = "{$kodeKecamatanPrefix}.{$nextNumber}";
+
+            return response()->json(['nomor_statistik' => $nomorStatistik]);
+        } catch (\Exception $e) {
+            \Log::error('Error generating nomor_statistik: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+        /**
+     * Import data dari file Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls,csv|max:10240', // max 10MB
+        ]);
+
+        try {
+            $file = $request->file('excel_file');
+            
+            // Import data menggunakan Laravel Excel
+            Excel::import(new \App\Imports\SktpiagammtImport, $file);
+            
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('success', 'Data Majelis Ta\'lim berhasil diimport.');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessage = 'Terjadi kesalahan pada: ';
+            
+            foreach ($failures as $failure) {
+                $value = $failure->values()[$failure->attribute()] ?? 'tidak ada nilai';
+                $errorMessage .= "\nBaris " . $failure->row() . " (kolom: " . $failure->attribute() . "): ";
+                $errorMessage .= $failure->errors()[0] ?? 'Error tidak diketahui';
+                if ($failure->attribute() == 'nomor_statistik' && isset($failure->values()['nomor_statistik'])) {
+                    $errorMessage .= " (Nomor Statistik: " . $failure->values()['nomor_statistik'] . ")";
+                }
+            }
+            
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('error', 'Gagal import data. ' . $errorMessage);
+        } catch (\Exception $e) {
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('error', 'Gagal import data. ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download template Excel untuk import data
+     */
+    public function downloadTemplate()
+    {
+        $filePath = public_path('templates/template_import_mt.xlsx');
+        
+        // Jika file template belum ada, buat template baru
+        if (!file_exists($filePath)) {
+            // Buat direktori jika belum ada
+            if (!file_exists(public_path('templates'))) {
+                mkdir(public_path('templates'), 0755, true);
+            }
+            
+            // Buat template Excel baru
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            
+            // Header kolom
+            $headers = [
+                'Nomor Statistik', 'Nama Majelis', 'Alamat', 'Kecamatan ID', 
+                'Kelurahan ID', 'Tanggal Berdiri (YYYY-MM-DD)', 'Status (aktif/nonaktif)', 
+                'Ketua', 'No HP', 'Tanggal Mendaftar (YYYY-MM-DD)', 
+                'Tanggal Mendaftar Ulang (YYYY-MM-DD)'
+            ];
+            
+            // Tulis header
+            foreach ($headers as $index => $header) {
+                $sheet->setCellValueByColumnAndRow($index + 1, 1, $header);
+            }
+            
+            // Contoh data
+            $exampleData = [
+                '431.2.64.02.01.001', 'Majelis Ta\'lim Al-Ikhlas', 'Jl. Contoh No. 123', '1',
+                '1', '2020-01-01', 'aktif', 'Ahmad', '08123456789', '2020-01-15', '2023-01-15'
+            ];
+            
+            // Tulis contoh data
+            foreach ($exampleData as $index => $value) {
+                $sheet->setCellValueByColumnAndRow($index + 1, 2, $value);
+            }
+            
+            // Style header
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'CCCCCC']
+                ]
+            ];
+            $sheet->getStyle('A1:K1')->applyFromArray($headerStyle);
+            
+            // Auto size kolom
+            foreach (range('A', 'K') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+            
+            // Simpan file
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save($filePath);
+        }
+        
+        return response()->download($filePath, 'template_import_majelis_talim.xlsx');
+    }
+    /**
+     * Upload file berkas majelis ta'lim
+     */
+    public function uploadBerkas(Request $request)
+    {
+        $request->validate([
+            'berkas_id' => 'required|exists:sktpiagammts,id',
+            'berkas_file' => 'required|file|mimes:pdf|max:5120', // max 5MB, hanya PDF
+        ]);
+    
+        try {
+            $sktpiagammt = Sktpiagammt::findOrFail($request->berkas_id);
+            
+            // Upload file menggunakan helper method
+            $fileName = $this->handleFileUpload(
+                $request->file('berkas_file'),
+                'berkas',
+                $sktpiagammt->file_berkas
+            );
+            
+            // Update database
+            $sktpiagammt->file_berkas = $fileName;
+            $sktpiagammt->save();
+            
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('success', 'Berkas Majelis Ta\'lim berhasil diupload.');
+        } catch (\Exception $e) {
+            \Log::error('Upload Berkas Error: ' . $e->getMessage());
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('error', 'Terjadi kesalahan saat upload berkas. Silakan coba lagi.');
+        }
+    }
+    
+
+    /**
+     * Upload file SKT
+     */
+    public function uploadSkt(Request $request)
+    {
+        $request->validate([
+            'skt_id' => 'required|exists:sktpiagammts,id',
+            'skt_file' => 'required|file|mimes:pdf|max:5120', // max 5MB, hanya PDF
+        ]);
+
+        try {
+            $sktpiagammt = Sktpiagammt::findOrFail($request->skt_id);
+            
+            // Upload file menggunakan helper method
+            $fileName = $this->handleFileUpload(
+                $request->file('skt_file'),
+                'skt',
+                $sktpiagammt->file_skt
+            );
+            
+            // Update database
+            $sktpiagammt->file_skt = $fileName;
+            $sktpiagammt->save();
+            
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('success', 'File SKT berhasil diupload.');
+        } catch (\Exception $e) {
+            \Log::error('Upload SKT Error: ' . $e->getMessage());
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('error', 'Terjadi kesalahan saat upload file SKT. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Upload file Piagam
+     */
+    public function uploadPiagam(Request $request)
+    {
+        $request->validate([
+            'piagam_id' => 'required|exists:sktpiagammts,id',
+            'piagam_file' => 'required|file|mimes:pdf|max:5120', // max 5MB, hanya PDF
+        ]);
+
+        try {
+            $sktpiagammt = Sktpiagammt::findOrFail($request->piagam_id);
+            
+            // Upload file menggunakan helper method
+            $fileName = $this->handleFileUpload(
+                $request->file('piagam_file'),
+                'piagam',
+                $sktpiagammt->file_piagam
+            );
+            
+            // Update database
+            $sktpiagammt->file_piagam = $fileName;
+            $sktpiagammt->save();
+            
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('success', 'File Piagam berhasil diupload.');
+        } catch (\Exception $e) {
+            \Log::error('Upload Piagam Error: ' . $e->getMessage());
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('error', 'Terjadi kesalahan saat upload piagam. Silakan coba lagi.');
+        }
+    }
+    /**
+     * Hapus file SKT
+     */
+    public function deleteSkt($id)
+    {
+        try {
+            $sktpiagammt = Sktpiagammt::findOrFail($id);
+            
+            // Hapus file jika ada
+            if ($sktpiagammt->file_skt && file_exists(storage_path(self::UPLOAD_PATH['skt'] . '/' . $sktpiagammt->file_skt))) {
+                unlink(storage_path(self::UPLOAD_PATH['skt'] . '/' . $sktpiagammt->file_skt));
+            }
+            
+            // Update database
+            $sktpiagammt->file_skt = null;
+            $sktpiagammt->save();
+            
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('success', 'File SKT berhasil dihapus.');
+        } catch (\Exception $e) {
+            \Log::error('Delete SKT Error: ' . $e->getMessage());
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus file SKT. Silakan coba lagi.');
+        }
+    }
+    
+    /**
+     * Hapus file Piagam
+     */
+    public function deletePiagam($id)
+    {
+        try {
+            $sktpiagammt = Sktpiagammt::findOrFail($id);
+            
+            // Hapus file jika ada
+            if ($sktpiagammt->file_piagam && file_exists(storage_path(self::UPLOAD_PATH['piagam'] . '/' . $sktpiagammt->file_piagam))) {
+                unlink(storage_path(self::UPLOAD_PATH['piagam'] . '/' . $sktpiagammt->file_piagam));
+            }
+            
+            // Update database
+            $sktpiagammt->file_piagam = null;
+            $sktpiagammt->save();
+            
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('success', 'File Piagam berhasil dihapus.');
+        } catch (\Exception $e) {
+            \Log::error('Delete Piagam Error: ' . $e->getMessage());
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus file Piagam. Silakan coba lagi.');
+        }
+    }
+    
+    /**
+     * Menampilkan rekapan data Majelis Ta'lim
+     */
+    public function rekap()
+    {
+        // Ambil semua data Majelis Ta'lim dengan relasi
+        $sktpiagammts = Sktpiagammt::with(['kecamatan', 'kelurahan'])->get();
+        
+        // Hitung total berdasarkan status
+        $totalAktif = $sktpiagammts->where('status', 'aktif')->count();
+        $totalNonaktif = $sktpiagammts->where('status', 'nonaktif')->count();
+        
+        // Hitung total berdasarkan kecamatan
+        $totalPerKecamatan = $sktpiagammts->groupBy('kecamatan.kecamatan')
+            ->map(function ($items) {
+                return [
+                    'total' => $items->count(),
+                    'aktif' => $items->where('status', 'aktif')->count(),
+                    'nonaktif' => $items->where('status', 'nonaktif')->count(),
+                ];
+            });
+        
+        return view('backend.skt_piagam_mt.rekap', compact(
+            'sktpiagammts', 
+            'totalAktif', 
+            'totalNonaktif', 
+            'totalPerKecamatan'
+        ));
+    }
+    
+    /**
+     * Export data ke Excel
+     */
+    public function export() 
+    {
+        return Excel::download(new \App\Exports\SktpiagammtExport, 'majelis_talim.xlsx');
+    }
+
+    
+    /**
+     * Hapus file Berkas
+     */
+    public function deleteBerkas($id)
+    {
+        try {
+            $sktpiagammt = Sktpiagammt::findOrFail($id);
+            
+            // Hapus file jika ada
+            if ($sktpiagammt->file_berkas && file_exists(storage_path(self::UPLOAD_PATH['berkas'] . '/' . $sktpiagammt->file_berkas))) {
+                unlink(storage_path(self::UPLOAD_PATH['berkas'] . '/' . $sktpiagammt->file_berkas));
+            }
+            
+            // Update database
+            $sktpiagammt->file_berkas = null;
+            $sktpiagammt->save();
+            
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('success', 'Berkas Majelis Ta\'lim berhasil dihapus.');
+        } catch (\Exception $e) {
+            \Log::error('Delete Berkas Error: ' . $e->getMessage());
+            return redirect()->route('skt_piagam_mt.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus berkas. Silakan coba lagi.');
+        }
+    }
+        
+    /**
+     * Menampilkan data majelis taklim yang sudah dihapus
+     */
+    public function trash()
+    {
+        $trashedData = Sktpiagammt::onlyTrashed()
+            ->with(['kecamatan', 'kelurahan'])
+            ->orderBy('deleted_at', 'desc')
+            ->get();
+        
+        return view('backend.skt_piagam_mt.trash', compact('trashedData'));
+    }
+
+    /**
+     * Memulihkan data majelis taklim yang sudah dihapus
+     */
+    public function restore($id)
+    {
+        try {
+            $sktpiagammt = Sktpiagammt::withTrashed()->findOrFail($id);
+            $nama = $sktpiagammt->nama_majelis;
+            
+            $sktpiagammt->restore();
+
+            Alert::success('Berhasil', "Data Majelis Ta'lim '$nama' berhasil dipulihkan.");
+            
+            return redirect()->route('skt_piagam_mt.trash');
+        } catch (\Exception $e) {
+            Alert::error('Gagal', 'Gagal memulihkan data. ' . $e->getMessage());
+            return redirect()->route('skt_piagam_mt.trash');
+        }
+    }
+
+    /**
+     * Menghapus data majelis taklim secara permanen
+     */
+    public function forceDelete($id)
+    {
+        try {
+            $sktpiagammt = Sktpiagammt::withTrashed()->findOrFail($id);
+            $nama = $sktpiagammt->nama_majelis;
+            
+            // Hapus file SKT jika ada
+            if ($sktpiagammt->file_skt && file_exists(storage_path('app/public/skt/' . $sktpiagammt->file_skt))) {
+                unlink(storage_path('app/public/skt/' . $sktpiagammt->file_skt));
+            }
+            
+            // Hapus file Piagam jika ada
+            if ($sktpiagammt->file_piagam && file_exists(storage_path('app/public/piagam/' . $sktpiagammt->file_piagam))) {
+                unlink(storage_path('app/public/piagam/' . $sktpiagammt->file_piagam));
+            }
+            
+            // Hapus file Berkas jika ada
+            if ($sktpiagammt->file_berkas && file_exists(storage_path('app/public/berkas/' . $sktpiagammt->file_berkas))) {
+                unlink(storage_path('app/public/berkas/' . $sktpiagammt->file_berkas));
+            }
+            
+            $sktpiagammt->forceDelete();
+            
+            // Menggunakan Alert facade untuk menampilkan notifikasi sukses
+            Alert::success('Berhasil', "Data Majelis Ta'lim '$nama' berhasil dihapus permanen.");
+            
+            return redirect()->route('skt_piagam_mt.trash');
+        } catch (\Exception $e) {
+            // Menggunakan Alert facade untuk menampilkan notifikasi error
+            Alert::error('Gagal', 'Gagal menghapus data permanen. ' . $e->getMessage());
+            
+            return redirect()->route('skt_piagam_mt.trash');
+        }
+    }
+}
