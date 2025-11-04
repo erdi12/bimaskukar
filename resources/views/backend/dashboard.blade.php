@@ -7,13 +7,14 @@
         <h3>Dashboard</h3>
     </div>
     <section class="section">
+        <!-- PERBAIKAN 1: Menambahkan kartu "Belum Update" dan menyesuaikan grid -->
         <div class="row mb-2">
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
                 <div class="card bg-primary text-white">
                     <div class="card-body">
                         <div class="d-flex flex-column">
                             <div class='px-3 py-3 d-flex justify-content-between'>
-                                <h3 class='card-title text-white'>Total Majelis Ta'lim</h3>
+                                <h5 class='card-title text-white'>Total Majelis</h5>
                                 <div class="card-right d-flex align-items-center">
                                     <h2 class="text-white">{{ count($sktpiagammts) }}</h2>
                                 </div>
@@ -22,12 +23,12 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
                 <div class="card bg-success text-white">
                     <div class="card-body">
                         <div class="d-flex flex-column">
                             <div class='px-3 py-3 d-flex justify-content-between'>
-                                <h3 class='card-title text-white'>Majelis Ta'lim Aktif</h3>
+                                <h5 class='card-title text-white'>Majelis Aktif</h5>
                                 <div class="card-right d-flex align-items-center">
                                     <h2 class="text-white">{{ $totalAktif }}</h2>
                                 </div>
@@ -36,12 +37,26 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex flex-column">
+                            <div class='px-3 py-3 d-flex justify-content-between'>
+                                <h5 class='card-title text-white'>Belum Update</h5>
+                                <div class="card-right d-flex align-items-center">
+                                    <h2 class="text-white">{{ $totalBelumUpdate ?? 0 }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-3">
                 <div class="card bg-danger text-white">
                     <div class="card-body">
                         <div class="d-flex flex-column">
                             <div class='px-3 py-3 d-flex justify-content-between'>
-                                <h3 class='card-title text-white'>Majelis Ta'lim Non-Aktif</h3>
+                                <h5 class='card-title text-white'>Majelis Non-Aktif</h5>
                                 <div class="card-right d-flex align-items-center">
                                     <h2 class="text-white">{{ $totalNonaktif }}</h2>
                                 </div>
@@ -53,7 +68,7 @@
         </div>
         <div class="row mb-4">
             <!-- Pie Chart untuk persentase aktif per kecamatan -->
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
                         <h5>Persentase Majelis Ta'lim Aktif</h5>
@@ -70,9 +85,27 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Persentase Majelis Ta'lim Belum Update</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:250px; width:100%;">
+                            <canvas id="BelumUpdatePieChart"></canvas>
+                        </div>
+                        <div class="text-center mt-2">
+                            <button id="downloadBelumUpdatePieChart" class="btn btn-warning btn-sm">
+                                <i data-feather="download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- Pie Chart untuk persentase non-aktif per kecamatan -->
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
                         <h5>Persentase Majelis Ta'lim Non-Aktif</h5>
@@ -98,7 +131,7 @@
                         <h5>Rekapitulasi Per Kecamatan</h5>
                     </div>
                     <div class="card-body">
-                        <div class="chart-container" style="position: relative; height:300px; width:100%;">
+                        <div class="chart-container" style="position: relative; height:700px; width:100%;">
                             <canvas id="kecamatanChart"></canvas>
                         </div>
                         <div class="text-center mt-2">
@@ -116,18 +149,21 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title">Detail Data</h4>
                         <div class="d-flex">
+                            <!-- Tempatkan tombol download tabel di sini jika perlu -->
                             <i data-feather="download"></i>
                         </div>
                     </div>
                     <div class="card-body px-0 pb-0">
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered">
+                            <table class="table table-hover table-bordered text-center">
                                 <thead>
                                     <tr>
                                         <th>No</th>
                                         <th>Kecamatan</th>
                                         <th>Total</th>
                                         <th>Aktif</th>
+                                        <!-- PERBAIKAN 2: Menambahkan kolom "Belum Update" -->
+                                        <th>Belum Update</th>
                                         <th>Non-Aktif</th>
                                     </tr>
                                 </thead>
@@ -135,9 +171,11 @@
                                     @foreach($kecamatanData as $index => $data)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td>{{ ucwords($data['nama']) }}</td>
+                                        <td class="text-start">{{ ucwords($data['nama']) }}</td>
                                         <td>{{ $data['total'] }}</td>
                                         <td>{{ $data['aktif'] }}</td>
+                                        <!-- PERBAIKAN 2: Menampilkan data "Belum Update" -->
+                                        <td>{{ $data['belum_update'] ?? 0 }}</td>
                                         <td>{{ $data['nonaktif'] }}</td>
                                     </tr>
                                     @endforeach
@@ -196,6 +234,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     data: filteredData.map(i => i.aktif),
                     backgroundColor: 'rgba(75, 192, 192, 0.7)',
                     borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Belum Update',
+                    data: filteredData.map(i => i.belum_update),
+                    backgroundColor: 'rgba(255, 205, 86, 0.7)',
+                    borderColor: 'rgba(255, 205, 86, 1)',
                     borderWidth: 1
                 },
                 {
@@ -263,8 +308,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     } else {
-        // kosongkan canvas jika tidak ada data
         document.getElementById('aktifPieChart').style.display = 'none';
+    }
+
+    // --- Pie chart Belum Update (hanya kecamatan dengan belum_update > 0) ---
+    const BelumUpdateData = filteredData.filter(i => i.belum_update && i.belum_update > 0);
+    if (BelumUpdateData.length) {
+        const ctxBelumUpdate = document.getElementById('BelumUpdatePieChart').getContext('2d');
+        // PERBAIKAN 3: Memperbaiki nama variabel yang salah ketik
+        const totalBelumUpdateShown = BelumUpdateData.reduce((s, i) => s + i.belum_update, 0);
+        new Chart(ctxBelumUpdate, {
+            type: 'pie',
+            data: {
+                labels: BelumUpdateData.map(i => i.nama),
+                datasets: [{
+                    data: BelumUpdateData.map(i => i.belum_update),
+                    backgroundColor: [
+                        'rgba(255, 205, 86, 0.7)','rgba(255, 159, 64, 0.7)','rgba(255, 99, 132, 0.7)',
+                        'rgba(201, 203, 207, 0.7)','rgba(54, 162, 235, 0.7)','rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 205, 86, 0.5)','rgba(255, 159, 64, 0.5)','rgba(255, 99, 132, 0.5)','rgba(201, 203, 207, 0.5)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const pct = totalBelumUpdateShown ? Math.round((value / totalBelumUpdateShown) * 100) : 0;
+                                return `${label}: ${value} (${pct}%)`;
+                            }
+                        }
+                    },
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                }
+            }
+        });
+    } else {
+        document.getElementById('BelumUpdatePieChart').style.display = 'none';
     }
 
     // --- Pie chart Non-Aktif (hanya kecamatan dengan nonaktif > 0) ---
@@ -323,7 +409,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (c && c.toDataURL) {
             const link = document.createElement('a');
             link.download = 'Persentase_Majelis_Talim_Aktif_Per_Kecamatan.png';
-            // get canvas from Chart.js instance: easiest is to select canvas element
+            link.href = c.toDataURL('image/png');
+            link.click();
+        }
+    });
+    
+    // PERBAIKAN 3: Memperbaiki fungsi download untuk chart "Belum Update"
+    const dlBelumUpdate = document.getElementById('downloadBelumUpdatePieChart');
+    if (dlBelumUpdate) dlBelumUpdate.addEventListener('click', function() {
+        // Mengambil elemen canvas, bukan button
+        const c = document.getElementById('BelumUpdatePieChart'); 
+        if (c && c.toDataURL) {
+            const link = document.createElement('a');
+            // Memperbaiki nama file download
+            link.download = 'Persentase_Majelis_Talim_Belum_Update_Per_Kecamatan.png';
             link.href = c.toDataURL('image/png');
             link.click();
         }

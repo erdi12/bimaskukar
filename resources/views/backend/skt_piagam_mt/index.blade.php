@@ -3,6 +3,17 @@
 @section('layanan', 'active')
 @section('skt-mt', 'active')
 
+@push('css')
+<style>
+    .table td {
+        white-space: nowrap;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="main-content container-fluid">
     <div class="page-title">
@@ -138,11 +149,13 @@
                                         <td>{{ $item->alamat }}</td>
                                         <td>{{ $item->kelurahan->nama_kelurahan }}</td>
                                         <td>{{ ucfirst($item->kecamatan->kecamatan) }}</td>
-                                        <td>
+                                        <td class="text-center">
                                             @if($item->status == 'aktif')
                                                 <span class="badge bg-success">Aktif</span>
-                                            @else
+                                            @elseif($item->status == 'nonaktif')
                                                 <span class="badge bg-danger">Non-Aktif</span>
+                                            @else
+                                                <span class="badge bg-warning">Belum Update</span>
                                             @endif
                                         </td>
                                         <td>{{ $item->ketua }}</td>
@@ -324,7 +337,7 @@
                                                 </div>
 
                                                 <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Selesai</button>
                                                 <button type="submit" class="btn btn-primary">Cetak SKT</button>
                                                 </div>
                                             </form>

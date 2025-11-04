@@ -6,6 +6,7 @@
     <title>Dashboard - Voler Admin Dashboard</title>
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" href="{{ asset('voler/assets/images/logo-kemenag.png') }}" type="image/png">
     
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('voler/assets/css/bootstrap.css') }}">
@@ -18,12 +19,14 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('voler/assets/vendors/choices.js/choices.min.css') }}" />
     
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    
     <!-- Chart CSS -->
     <link rel="stylesheet" href="{{ asset('voler/assets/vendors/chartjs/Chart.min.css') }}">
     
     <!-- Additional CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="shortcut icon" href="{{ asset('voler/assets/images/favicon.svg') }}" type="image/x-icon">
     
     <style>
         .modal-backdrop.show {
@@ -58,7 +61,8 @@
     <script src="{{ asset('voler/assets/vendors/apexcharts/apexcharts.min.js') }}"></script>
     
     <!-- Data Tables -->
-    {{-- <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script> --}}
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <script src="{{ asset('voler/assets/vendors/simple-datatables/simple-datatables.js') }}"></script>
     
     <!-- Custom JS -->

@@ -1,0 +1,6 @@
+:80 {
+    root * /var/www/html
+    php_server
+    encode gzip zstd
+    file_server
+}

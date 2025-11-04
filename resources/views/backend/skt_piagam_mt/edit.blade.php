@@ -110,6 +110,7 @@
                                                 <select class="form-select @error('status') is-invalid @enderror" id="status" name="status">
                                                     <option value="aktif" {{ old('status', $sktpiagammt->status) == 'aktif' ? 'selected' : '' }}>Aktif</option>
                                                     <option value="nonaktif" {{ old('status', $sktpiagammt->status) == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                                    <option value="belum_update" {{ old('status', $sktpiagammt->status) == 'belum_update' ? 'selected' : '' }}>Belum Update</option>
                                                 </select>
                                                 @error('status')
                                                     <span class="invalid-feedback">{{ $message }}</span>

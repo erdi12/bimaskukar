@@ -13,6 +13,7 @@ use Illuminate\Routing\Controller;
 use Spatie\Browsershot\Browsershot;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Storage;
+use yajra\DataTables\Facades\DataTables;
 
 class SktpiagammtController extends Controller
 {
@@ -54,6 +55,77 @@ class SktpiagammtController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index(Request $request)
+    // {
+    //     if ($request->ajax()) {
+    //         $query = \App\Models\Sktpiagammt::with(['kecamatan', 'kelurahan']);
+
+    //         // Filter berdasarkan request
+    //         if ($request->has('kecamatan_id') && $request->kecamatan_id) {
+    //             $query->where('kecamatan_id', $request->kecamatan_id);
+    //         }
+            
+    //         if ($request->has('kelurahan_id') && $request->kelurahan_id) {
+    //             $query->where('kelurahan_id', $request->kelurahan_id);
+    //         }
+
+    //         return DataTables::of($query)
+    //             ->addIndexColumn()
+    //             ->addColumn('kecamatan_nama', function($row) {
+    //                 return $row->kecamatan->kecamatan ?? '-';
+    //             })
+    //             ->addColumn('kelurahan_nama', function($row) {
+    //                 return $row->kelurahan->nama_kelurahan ?? '-';
+    //             })
+    //             ->addColumn('status_badge', function($row) {
+    //                 $badge = $row->status === 'aktif' 
+    //                     ? '<span class="badge bg-success">Aktif</span>'
+    //                     : '<span class="badge bg-danger">Nonaktif</span>';
+    //                 return $badge;
+    //             })
+    //             ->addColumn('action', function($row) {
+    //                 $actionBtn = '<div class="btn-group" role="group">';
+                    
+    //                 // Tombol Edit
+    //                 $actionBtn .= '<a href="' . route('skt_piagam_mt.edit', $row->id) . '" class="btn btn-primary btn-sm">
+    //                     <i class="bi bi-pencil-square"></i>
+    //                 </a>';
+
+    //                 // Tombol Cetak SKT
+    //                 $actionBtn .= '<a href="' . route('skt_piagam_mt.cetak_skt', $row->id) . '" class="btn btn-info btn-sm" target="_blank">
+    //                     <i class="bi bi-printer"></i> SKT
+    //                 </a>';
+
+    //                 // Tombol Cetak Piagam
+    //                 $actionBtn .= '<a href="' . route('skt_piagam_mt.cetak_piagam', $row->id) . '" class="btn btn-success btn-sm" target="_blank">
+    //                     <i class="bi bi-printer"></i> Piagam
+    //                 </a>';
+
+    //                 // Tombol Hapus
+    //                 $actionBtn .= '<form action="' . route('skt_piagam_mt.destroy', $row->id) . '" method="POST" class="d-inline" onsubmit="return confirm(\'Apakah Anda yakin ingin menghapus data ini?\')">';
+    //                 $actionBtn .= csrf_field() . method_field('DELETE');
+    //                 $actionBtn .= '<button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>';
+    //                 $actionBtn .= '</form>';
+                    
+    //                 $actionBtn .= '</div>';
+    //                 return $actionBtn;
+    //             })
+    //             ->rawColumns(['status_badge', 'action'])
+    //             ->make(true);
+    //     }
+
+    //     // Data untuk filter dropdown
+    //     $kecamatans = \App\Models\Kecamatan::all();
+    //     $kelurahans = collect();
+        
+    //     // Jika ada kecamatan_id di request, load kelurahan
+    //     if ($request->has('kecamatan_id') && $request->kecamatan_id) {
+    //         $kelurahans = \App\Models\Kelurahan::where('kecamatan_id', $request->kecamatan_id)->get();
+    //     }
+
+    //     return view('backend.skt_piagam_mt.index', compact('kecamatans', 'kelurahans'));
+    // }
+
     public function index()
     {
         // Ambil data yang diperlukan
@@ -109,7 +181,7 @@ class SktpiagammtController extends Controller
             'kecamatan_id' => 'required|exists:kecamatans,id',
             'kelurahan_id' => 'required|exists:kelurahans,id',
             'tanggal_berdiri' => 'required|date',
-            'status' => 'required|in:aktif,nonaktif',
+            'status' => 'required|in:aktif,nonaktif,belum_update',
             'ketua' => 'required',
             'no_hp' => 'required',
             'mendaftar' => 'required|date',
@@ -155,7 +227,7 @@ class SktpiagammtController extends Controller
             'kecamatan_id' => 'required|exists:kecamatans,id',
             'kelurahan_id' => 'required|exists:kelurahans,id',
             'tanggal_berdiri' => 'required|date',
-            'status' => 'required|in:aktif,nonaktif',
+            'status' => 'required|in:aktif,nonaktif,belum_update',
             'ketua' => 'required',
             'no_hp' => 'required',
             'mendaftar' => 'required|date',
@@ -466,7 +538,7 @@ class SktpiagammtController extends Controller
             // Header kolom
             $headers = [
                 'Nomor Statistik', 'Nama Majelis', 'Alamat', 'Kecamatan ID', 
-                'Kelurahan ID', 'Tanggal Berdiri (YYYY-MM-DD)', 'Status (aktif/nonaktif)', 
+                'Kelurahan ID', 'Tanggal Berdiri (YYYY-MM-DD)', 'Status (aktif/nonaktif/belum_update)', 
                 'Ketua', 'No HP', 'Tanggal Mendaftar (YYYY-MM-DD)', 
                 'Tanggal Mendaftar Ulang (YYYY-MM-DD)'
             ];
@@ -671,6 +743,7 @@ class SktpiagammtController extends Controller
         // Hitung total berdasarkan status
         $totalAktif = $sktpiagammts->where('status', 'aktif')->count();
         $totalNonaktif = $sktpiagammts->where('status', 'nonaktif')->count();
+        $totalBelumUpdate = $sktpiagammts->where('status', 'belum_update')->count();
         
         // Hitung total berdasarkan kecamatan
         $totalPerKecamatan = $sktpiagammts->groupBy('kecamatan.kecamatan')
@@ -679,6 +752,7 @@ class SktpiagammtController extends Controller
                     'total' => $items->count(),
                     'aktif' => $items->where('status', 'aktif')->count(),
                     'nonaktif' => $items->where('status', 'nonaktif')->count(),
+                    'belum_update' => $items->where('status', 'belum_update')->count(),
                 ];
             });
         
@@ -686,6 +760,7 @@ class SktpiagammtController extends Controller
             'sktpiagammts', 
             'totalAktif', 
             'totalNonaktif', 
+            'totalBelumUpdate', 
             'totalPerKecamatan'
         ));
     }

@@ -96,6 +96,7 @@
                                                     <option value="">Pilih Status</option>
                                                     <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                                                     <option value="nonaktif" {{ old('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                                    <option value="belum_update" {{ old('status') == 'nonaktif' ? 'selected' : '' }}>Belum Update</option>
                                                 </select>
                                             </fieldset>
                                         </div>

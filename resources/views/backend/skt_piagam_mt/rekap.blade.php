@@ -17,7 +17,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card bg-primary text-white">
                                 <div class="card-body">
                                     <h5 class="card-title text-white">Total Majelis Ta'lim</h5>
@@ -25,7 +25,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card bg-success text-white">
                                 <div class="card-body">
                                     <h5 class="card-title text-white">Majelis Ta'lim Aktif</h5>
@@ -33,7 +33,15 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title text-white">Majelis Ta'lim Belum Update</h5>
+                                    <h2 class="text-white">{{ $totalBelumUpdate }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="card bg-danger text-white">
                                 <div class="card-body">
                                     <h5 class="card-title text-white">Majelis Ta'lim Non-Aktif</h5>
@@ -46,7 +54,7 @@
                     <!-- Tambahkan row baru untuk pie charts -->                    
                     <div class="row mb-4">
                         <!-- Pie Chart untuk persentase aktif per kecamatan -->
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="card shadow">
                                 <div class="card-body">
                                     <h5>Persentase Majelis Ta'lim Aktif</h5>
@@ -61,10 +69,25 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="card shadow">
+                                <div class="card-body">
+                                    <h5>Persentase Majelis Ta'lim Belum Update</h5>
+                                    <div class="chart-container" style="position: relative; height:250px; width:100%;">
+                                        <canvas id="BelumUpdatePieChart"></canvas>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <button id="downloadBelumUpdatePieChart" class="btn btn-warning btn-sm">
+                                            <i data-feather="download"></i> Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Pie Chart untuk persentase non-aktif per kecamatan -->
-                        <div class="col-md-6">
-                            <div class="card">
+                        <div class="col-md-4">
+                            <div class="card shadow">
                                 <div class="card-body">
                                     <h5>Persentase Majelis Ta'lim Non-Aktif</h5>
                                 <div class="chart-container" style="position: relative; height:250px; width:100%;">
@@ -87,7 +110,7 @@
                             <div class="card shadow">
                                 <div class="card-body">
                                     <h5>Rekapitulasi Per Kecamatan</h5>
-                                    <div class="chart-container" style="position: relative; height:300px; width:100%;">
+                                    <div class="chart-container" style="position: relative; height:700px; width:100%;">
                                         <canvas id="kecamatanChart"></canvas>
                                     </div>
                                     <div class="text-center mt-2">
@@ -110,6 +133,7 @@
                                     <th>Kecamatan</th>
                                     <th>Total</th>
                                     <th>Aktif</th>
+                                    <th>Belum Update</th>
                                     <th>Non-Aktif</th>
                                 </tr>
                             </thead>
@@ -120,6 +144,7 @@
                                     <td>{{ ucfirst($kecamatan) }}</td>
                                     <td>{{ $data['total'] }}</td>
                                     <td>{{ $data['aktif'] }}</td>
+                                    <td>{{ $data['belum_update'] ?? 0 }}</td>
                                     <td>{{ $data['nonaktif'] }}</td>
                                 </tr>
                                 @endforeach
@@ -147,6 +172,7 @@
         const kecamatanData = @json($totalPerKecamatan);
         const totalAktif = {{ $totalAktif }};
         const totalNonaktif = {{ $totalNonaktif }};
+        const totalBelumUpdate = {{ $totalBelumUpdate }};
         const totalMajelis = {{ count($sktpiagammts) }};
         
         // Persiapkan data untuk bar chart
@@ -157,10 +183,12 @@
         const totalData = [];
         const aktifData = [];
         const nonaktifData = [];
+        const belumupdateData = [];
         
         Object.keys(kecamatanData).forEach((kecamatan, index) => {
             totalData.push(kecamatanData[kecamatan].total);
             aktifData.push(kecamatanData[kecamatan].aktif);
+            belumupdateData.push(kecamatanData[kecamatan].belum_update);
             nonaktifData.push(kecamatanData[kecamatan].nonaktif);
         });
         
@@ -183,6 +211,13 @@
                         data: aktifData,
                         backgroundColor: 'rgba(75, 192, 192, 0.7)',
                         borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Belum Update',
+                        data: belumupdateData,
+                        backgroundColor: 'rgba(192, 184, 75, 0.7)',
+                        borderColor: 'rgba(192, 190, 75, 1)',
                         borderWidth: 1
                     },
                     {
@@ -238,6 +273,23 @@
         ];
         const aktifBorderColors = aktifColors.map(color => color.replace('0.7', '1').replace('0.5', '1'));
         
+        // Persiapkan data untuk pie chart Belum Update
+        const belumupdateLabels = [];
+        const belumupdateValues = [];
+        const belumupdateColors = [
+            'rgba(255, 205, 86, 0.7)',   // Kuning
+            'rgba(255, 159, 64, 0.7)',   // Oranye
+            'rgba(201, 203, 207, 0.7)',  // Abu-abu
+            'rgba(54, 162, 235, 0.7)',   // Biru
+            'rgba(153, 102, 255, 0.7)',  // Ungu
+            'rgba(75, 192, 192, 0.7)',   // Hijau
+            'rgba(255, 205, 86, 0.5)',   // Kuning muda
+            'rgba(255, 159, 64, 0.5)',   // Oranye muda
+            'rgba(201, 203, 207, 0.5)',  // Abu-abu muda
+            'rgba(54, 162, 235, 0.5)',   // Biru muda
+        ];
+        const belumupdateBorderColors = belumupdateColors.map(color => color.replace('0.7', '1').replace('0.5', '1'));
+        
         // Persiapkan data untuk pie chart non-aktif
         const nonaktifLabels = [];
         const nonaktifValues = [];
@@ -263,6 +315,12 @@
             if (kecamatanData[kecamatan].aktif > 0) {
                 aktifLabels.push(capitalizedKecamatan);
                 aktifValues.push(kecamatanData[kecamatan].aktif);
+            }
+
+            // Hanya tambahkan ke chart aktif jika ada data belum update
+            if (kecamatanData[kecamatan].belum_update > 0) {
+                belumupdateLabels.push(capitalizedKecamatan);
+                belumupdateValues.push(kecamatanData[kecamatan].belum_update);
             }
             
             // Hanya tambahkan ke chart non-aktif jika ada data non-aktif
@@ -298,6 +356,49 @@
                                 const label = context.label || '';
                                 const value = context.raw || 0;
                                 const percentage = Math.round((value / totalAktif) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Buat pie chart untuk majelis ta'lim belum update
+        const ctxBelumUpdate = document.getElementById('BelumUpdatePieChart').getContext('2d');
+        const belumUpdatePieChart = new Chart(ctxBelumUpdate, {
+            type: 'pie',
+            data: {
+                labels: belumupdateLabels,
+                datasets: [{
+                    data: belumupdateValues,
+                    backgroundColor: belumupdateColors.slice(0, belumupdateLabels.length),
+                    borderColor: belumupdateBorderColors.slice(0, belumupdateLabels.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const percentage = Math.round((value / totalBelumUpdate) * 100);
                                 return `${label}: ${value} (${percentage}%)`;
                             }
                         }
@@ -371,6 +472,14 @@
             const link = document.createElement('a');
             link.download = 'Persentase_Majelis_Talim_Aktif_Per_Kecamatan.png';
             link.href = aktifPieChart.toBase64Image();
+            link.click();
+        });
+        
+        // Fungsi untuk download pie chart belum update
+        document.getElementById('downloadBelumUpdatePieChart').addEventListener('click', function() {
+            const link = document.createElement('a');
+            link.download = 'Persentase_Majelis_Talim_Belum_Update_Per_Kecamatan.png';
+            link.href = belumUpdatePieChart.toBase64Image();
             link.click();
         });
         

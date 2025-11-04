@@ -27,7 +27,7 @@ return new class extends Migration
                 ->onDelete('cascade');
 
             $table->date('tanggal_berdiri')->index();
-            $table->enum('status', ['aktif', 'nonaktif'])->index();
+            $table->enum('status', ['aktif', 'nonaktif', 'belum_update'])->index();
             $table->string('ketua');
             $table->string('no_hp');
             $table->string('mendaftar');

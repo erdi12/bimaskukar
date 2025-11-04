@@ -24,17 +24,17 @@ class SktpiagammtExport implements FromCollection, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
-            'Nomor Statistik',
-            'Nama Majelis',
-            'Alamat',
-            'Kelurahan',
-            'Kecamatan',
-            'Tanggal Berdiri',
-            'Status',
-            'Ketua',
-            'No HP',
-            'Tanggal Mendaftar',
-            'Tanggal Mendaftar Ulang'
+            'nomor_statistik',
+            'nama_majelis',
+            'alamat',
+            'kelurahan',
+            'kecamatan',
+            'tanggal_berdiri',
+            'status',
+            'ketua',
+            'no_hp',
+            'mendaftar',
+            'mendaftar_ulang'
         ];
     }
 
@@ -49,8 +49,8 @@ class SktpiagammtExport implements FromCollection, WithHeadings, WithMapping
             $row->nomor_statistik,
             $row->nama_majelis,
             $row->alamat,
-            $row->kelurahan ? $row->kelurahan->nama_kelurahan : '',
-            $row->kecamatan ? ucwords($row->kecamatan->kecamatan) : '',
+            $row->kelurahan ? $row->kelurahan->id : '',
+            $row->kecamatan ? $row->kecamatan->id : '',
             $row->tanggal_berdiri,
             $row->status,
             $row->ketua,
