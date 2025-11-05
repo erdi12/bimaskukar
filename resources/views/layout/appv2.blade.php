@@ -18,146 +18,10 @@
     <link rel="stylesheet" href="{{ asset('voler/assets/css/simtak.css') }}">
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <h1 class="logo-text">SIMTAK</h1>
-                <img src="https://i.ibb.co/6P6sQ2v/kemenag-logo.png" alt="Logo Kemenag" class="logo-image">
-            </div>
-            <p>Sistem Informasi Manajemen Majelis Taklim</p>
-        </div>
-        
-        <div class="sidebar-menu">
-            <div class="menu-item active" data-tooltip="Dashboard">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
-            </div>
-            
-            <div class="menu-item" data-tooltip="Jemaah">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-users"></i>
-                    <span>Jemaah</span>
-                </a>
-            </div>
-            
-            <div class="menu-item" data-tooltip="Kegiatan">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Kegiatan</span>
-                    <span class="badge">3</span>
-                </a>
-            </div>
-            
-            <div class="menu-item" data-tooltip="Majelis">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-mosque"></i>
-                    <span>Majelis</span>
-                </a>
-            </div>
-            
-            <div class="menu-item" data-tooltip="Donasi">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-donate"></i>
-                    <span>Donasi</span>
-                </a>
-            </div>
-            
-            <div class="menu-item" data-tooltip="Keilmuan">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-book"></i>
-                    <span>Keilmuan</span>
-                </a>
-                <div class="submenu">
-                    <a href="#" class="menu-link">
-                        <i class="fas fa-angle-right"></i>
-                        <span>Artikel</span>
-                    </a>
-                    <a href="#" class="menu-link">
-                        <i class="fas fa-angle-right"></i>
-                        <span>Video Kajian</span>
-                    </a>
-                    <a href="#" class="menu-link">
-                        <i class="fas fa-angle-right"></i>
-                        <span>Audio Kajian</span>
-                    </a>
-                </div>
-            </div>
-            
-            <div class="menu-item" data-tooltip="Laporan">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Laporan</span>
-                </a>
-            </div>
-            
-            <div class="menu-item" data-tooltip="Pengaturan">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-cog"></i>
-                    <span>Pengaturan</span>
-                </a>
-            </div>
-        </div>
-        
-        <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-avatar">AU</div>
-                <div class="user-details">
-                    <p class="user-name">Ahmad Umar</p>
-                    <p class="user-role">Administrator</p>
-                </div>
-            </div>
-            <button class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Keluar</span>
-            </button>
-        </div>
-    </div>
-    
+    @include('include.sidebarv2')    
     <!-- Main Content -->
     <div class="main-content" id="mainContent">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <button class="menu-toggle" id="menuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" class="form-control" placeholder="Cari...">
-                </div>
-            </div>
-            
-            <div class="header-right">
-                <div class="notification-icon">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge">5</span>
-                </div>
-                
-                <div class="header-user dropdown">
-                    <div class="user-avatar" data-bs-toggle="dropdown">AU</div>
-                    <div class="user-info">
-                        <p class="user-name">Ahmad Umar</p>
-                        <p class="user-role">Administrator</p>
-                    </div>
-                    <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="#">Profil</a></li>
-                        <li><a class="dropdown-item" href="#">Pengaturan</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Keluar</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
+        @include('include.headerv2')
         <!-- Content -->
         <div class="content">
             <div class="page-title">
@@ -314,6 +178,8 @@
         </div>
     </div>
     
+    @include('include.footerv2')
+    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
@@ -325,10 +191,12 @@
         document.getElementById('sidebarToggle').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
+            const header = document.getElementById('header'); // Tambahkan ini
             const icon = this.querySelector('i');
             
             sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('expanded');
+            header.classList.toggle('expanded'); // Tambahkan ini untuk mengubah class header
             
             // Change icon based on sidebar state
             if (sidebar.classList.contains('collapsed')) {

@@ -9,6 +9,10 @@ Route::get('/', function () {
     return view('frontend.home');
 });
 
+Route::get('/appv2', function () {
+    return view('layout.appv2');
+});
+
 Route::get('/loginv3', function () {
     return view('loginv3');
 })->name('loginv3');

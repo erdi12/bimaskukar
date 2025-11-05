@@ -16,6 +16,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
+        @font-face {
+            font-family: 'Ketupat Ramadhan';
+            src: url('../fonts/Ketupat-Ramadhan') format('truetype');
+        }
         :root {
             --hijau-utama: #31a831ff;
             --hijau-muda: #4caf50;
@@ -85,7 +89,7 @@
         }
         
         .login-info h1 {
-            font-family: 'Amiri', serif;
+            font-family: 'ketupat Ramadhan', sans-serif;
             font-size: 2.5rem;
             margin-bottom: 20px;
             color: var(--emas);
@@ -354,7 +358,7 @@
                 <div class="islamic-pattern">
                     <img src="{{ asset('voler/assets/images/logo-bimas.svg') }}" class="img-fluid" alt="" srcset="">
                 </div>
-                <h1 class="d-flex justify-content-center text-center">SIMTAK</h1>
+                <h1 class="d-flex justify-content-center text-center">S I M T A K</h1>
                 <h3 class="d-flex justify-content-center text-center">Sistem Informasi Manajemen Majelis Taklim</h3>
                 
                 
