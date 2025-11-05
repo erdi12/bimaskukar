@@ -26,6 +26,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     
     // SKT Piagam MT routes
+    // Route::get('/skt_piagam_mt', [SktPiagamMtController::class, 'index'])->name('skt_piagam_mt.index');
+    Route::get('/skt_piagam_mt/data', [SktPiagamMtController::class, 'getData'])->name('skt_piagam_mt.data');
     Route::resource('skt_piagam_mt', SktpiagammtController::class);
 
     // Cetak dokumen

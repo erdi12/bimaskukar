@@ -12,6 +12,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px; /* Adjust based on navbar height */
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
     }

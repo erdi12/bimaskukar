@@ -1,0 +1,798 @@
+@font-face {
+    font-family: 'Ketupat Ramadhan';
+    src: url('../fonts/Ketupat-Ramadhan.ttf') format('truetype');
+}
+:root {
+    --hijau-utama: #2d7a2d;
+    --hijau-muda: #4caf50;
+    --hijau-paling-muda: #e8f5e9;
+    --hijau-gelap: #1b5e20;
+    --emas: #d4af37;
+    --putih: #ffffff;
+    --abu-abu: #f5f5f5;
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 70px;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--abu-abu);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Sidebar Styles - Minimal Custom CSS */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    background: linear-gradient(135deg, var(--hijau-utama) 0%, var(--hijau-gelap) 100%);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-container {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.logo-text {
+    font-family: 'Ketupat Ramadhan', serif;
+    font-size: 2rem;
+    color: var(--emas);
+    margin: 0;
+    font-weight: 700;
+}
+
+.logo-image {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: none;
+}
+
+.sidebar.collapsed .logo-text {
+    display: none;
+}
+
+.sidebar.collapsed .logo-image {
+    display: block;
+}
+
+.sidebar-header p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    margin: 5px 0 0;
+}
+
+.sidebar.collapsed .sidebar-header p {
+    display: none;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.menu-item {
+    position: relative;
+}
+
+.menu-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--putih);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+    white-space: nowrap;
+}
+
+.menu-link:hover, 
+.menu-item.active .menu-link {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--emas);
+}
+
+.menu-link i {
+    width: 30px;
+    text-align: center;
+    margin-right: 10px;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.sidebar.collapsed .menu-link i {
+    margin-right: 0;
+}
+
+.menu-link span {
+    transition: all 0.3s;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .menu-link span {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+}
+
+.menu-link .badge {
+    margin-left: auto;
+    background-color: var(--emas);
+    color: var(--hijau-gelap);
+    font-size: 0.7rem;
+    padding: 3px 6px;
+    border-radius: 10px;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+.sidebar.collapsed .menu-link .badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    margin-left: 0;
+}
+
+.submenu {
+    background-color: rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+.menu-item.active .submenu {
+    display: block;
+}
+
+.sidebar.collapsed .submenu {
+    display: none;
+}
+
+.submenu .menu-link {
+    padding-left: 55px;
+    font-size: 0.9rem;
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar.collapsed .sidebar-footer {
+    padding: 15px 10px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.sidebar.collapsed .user-info {
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--emas);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    color: var(--hijau-gelap);
+    font-weight: 600;
+}
+
+.sidebar.collapsed .user-avatar {
+    margin-right: 0;
+    margin-bottom: 5px;
+}
+
+.user-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.sidebar.collapsed .user-details {
+    display: none;
+}
+
+.user-name {
+    color: var(--putih);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-role {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logout-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--putih);
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar.collapsed .logout-btn {
+    padding: 8px;
+}
+
+.sidebar.collapsed .logout-btn span {
+    display: none;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.logout-btn i {
+    margin-right: 8px;
+}
+
+.sidebar.collapsed .logout-btn i {
+    margin-right: 0;
+}
+
+/* Tooltip for collapsed sidebar */
+.sidebar.collapsed .menu-item {
+    position: relative;
+}
+
+.sidebar.collapsed .menu-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 10px;
+    background-color: var(--hijau-gelap);
+    color: var(--putih);
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    z-index: 1000;
+}
+
+.sidebar.collapsed .menu-item:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Main Content Styles - Using Bootstrap Classes */
+.main-content {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    transition: all 0.3s ease;
+    width: calc(100% - var(--sidebar-width));
+    overflow-x: hidden;
+}
+
+.main-content.expanded {
+    margin-left: var(--sidebar-collapsed-width);
+    width: calc(100% - var(--sidebar-collapsed-width));
+}
+
+/* Header Styles - Using Bootstrap Classes */
+.header {
+    background-color: var(--putih);
+    padding: 15px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--hijau-utama);
+    margin-right: 15px;
+    cursor: pointer;
+    display: none;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--hijau-utama);
+    margin-right: 15px;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.sidebar-toggle:hover {
+    background-color: var(--hijau-paling-muda);
+}
+
+.search-bar {
+    position: relative;
+    width: 300px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 8px 15px 8px 40px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.search-bar i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.notification-icon {
+    position: relative;
+    margin-right: 20px;
+    color: var(--hijau-utama);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.notification-icon:hover {
+    background-color: var(--hijau-paling-muda);
+}
+
+.notification-icon .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--emas);
+    color: var(--hijau-gelap);
+    font-size: 0.7rem;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.header-user .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--hijau-muda);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    color: var(--putih);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.header-user .user-info {
+    margin-right: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.header-user .user-info .user-name {
+    color: var(--hijau-gelap);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.header-user .user-info .user-role {
+    color: #666;
+    font-size: 0.8rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.dropdown-toggle {
+    background: none;
+    border: none;
+    color: var(--hijau-utama);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.dropdown-toggle:hover {
+    background-color: var(--hijau-paling-muda);
+}
+
+/* Content Styles - Using Bootstrap Classes */
+.content {
+    padding: 30px;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.page-title h1 {
+    font-family: 'Amiri', serif;
+    font-size: 2rem;
+    color: var(--hijau-gelap);
+    margin-bottom: 5px;
+}
+
+.page-title p {
+    color: #666;
+    margin: 0;
+}
+
+/* Dashboard Cards - Using Bootstrap Classes */
+.dashboard-card {
+    background-color: var(--putih);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background-color: var(--hijau-muda);
+}
+
+.dashboard-card.primary::before {
+    background-color: var(--hijau-muda);
+}
+
+.dashboard-card.warning::before {
+    background-color: #ffc107;
+}
+
+.dashboard-card.danger::before {
+    background-color: #dc3545;
+}
+
+.dashboard-card.info::before {
+    background-color: #17a2b8;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.dashboard-card.primary .card-icon {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: var(--hijau-muda);
+}
+
+.dashboard-card.warning .card-icon {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.dashboard-card.danger .card-icon {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.dashboard-card.info .card-icon {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+}
+
+.card-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--hijau-gelap);
+    margin-bottom: 5px;
+    word-wrap: break-word;
+}
+
+.card-change {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+}
+
+.card-change.positive {
+    color: var(--hijau-muda);
+}
+
+.card-change.negative {
+    color: #dc3545;
+}
+
+.card-change i {
+    margin-right: 5px;
+}
+
+/* Chart Card - Using Bootstrap Classes */
+.chart-card {
+    background-color: var(--putih);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    height: 100%;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--hijau-gelap);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chart-options {
+    display: flex;
+}
+
+.chart-option {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: color 0.3s;
+    white-space: nowrap;
+}
+
+.chart-option:hover, .chart-option.active {
+    color: var(--hijau-utama);
+}
+
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+/* Activity Section - Using Bootstrap Classes */
+.activity-section {
+    background-color: var(--putih);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.activity-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--hijau-gelap);
+    margin: 0;
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-item {
+    display: flex;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.activity-icon.success {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: var(--hijau-muda);
+}
+
+.activity-icon.warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.activity-icon.info {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+}
+
+.activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-text {
+    color: var(--hijau-gelap);
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    word-wrap: break-word;
+}
+
+.activity-time {
+    color: #999;
+    font-size: 0.8rem;
+}
+
+/* Responsive Styles - Using Bootstrap Classes */
+@media (max-width: 992px) {
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .menu-toggle {
+        display: block;
+    }
+    
+    .sidebar-toggle {
+        display: none;
+    }
+    
+    .search-bar {
+        display: none;
+    }
+    
+    .header-user .user-info {
+        display: none;
+    }
+}

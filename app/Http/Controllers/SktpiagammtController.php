@@ -3,17 +3,19 @@
 namespace App\Http\Controllers;
 
 use Log;
-use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use App\Models\Kecamatan;
+use App\Models\Kelurahan;
 use App\Models\Sktpiagammt;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Routing\Controller;
 use Spatie\Browsershot\Browsershot;
-use RealRashid\SweetAlert\Facades\Alert;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use RealRashid\SweetAlert\Facades\Alert;
 use yajra\DataTables\Facades\DataTables;
+use Illuminate\Database\QueryException;
 
 class SktpiagammtController extends Controller
 {
@@ -52,79 +54,7 @@ class SktpiagammtController extends Controller
         
         return $fileName;
     }
-    /**
-     * Display a listing of the resource.
-     */
-    // public function index(Request $request)
-    // {
-    //     if ($request->ajax()) {
-    //         $query = \App\Models\Sktpiagammt::with(['kecamatan', 'kelurahan']);
 
-    //         // Filter berdasarkan request
-    //         if ($request->has('kecamatan_id') && $request->kecamatan_id) {
-    //             $query->where('kecamatan_id', $request->kecamatan_id);
-    //         }
-            
-    //         if ($request->has('kelurahan_id') && $request->kelurahan_id) {
-    //             $query->where('kelurahan_id', $request->kelurahan_id);
-    //         }
-
-    //         return DataTables::of($query)
-    //             ->addIndexColumn()
-    //             ->addColumn('kecamatan_nama', function($row) {
-    //                 return $row->kecamatan->kecamatan ?? '-';
-    //             })
-    //             ->addColumn('kelurahan_nama', function($row) {
-    //                 return $row->kelurahan->nama_kelurahan ?? '-';
-    //             })
-    //             ->addColumn('status_badge', function($row) {
-    //                 $badge = $row->status === 'aktif' 
-    //                     ? '<span class="badge bg-success">Aktif</span>'
-    //                     : '<span class="badge bg-danger">Nonaktif</span>';
-    //                 return $badge;
-    //             })
-    //             ->addColumn('action', function($row) {
-    //                 $actionBtn = '<div class="btn-group" role="group">';
-                    
-    //                 // Tombol Edit
-    //                 $actionBtn .= '<a href="' . route('skt_piagam_mt.edit', $row->id) . '" class="btn btn-primary btn-sm">
-    //                     <i class="bi bi-pencil-square"></i>
-    //                 </a>';
-
-    //                 // Tombol Cetak SKT
-    //                 $actionBtn .= '<a href="' . route('skt_piagam_mt.cetak_skt', $row->id) . '" class="btn btn-info btn-sm" target="_blank">
-    //                     <i class="bi bi-printer"></i> SKT
-    //                 </a>';
-
-    //                 // Tombol Cetak Piagam
-    //                 $actionBtn .= '<a href="' . route('skt_piagam_mt.cetak_piagam', $row->id) . '" class="btn btn-success btn-sm" target="_blank">
-    //                     <i class="bi bi-printer"></i> Piagam
-    //                 </a>';
-
-    //                 // Tombol Hapus
-    //                 $actionBtn .= '<form action="' . route('skt_piagam_mt.destroy', $row->id) . '" method="POST" class="d-inline" onsubmit="return confirm(\'Apakah Anda yakin ingin menghapus data ini?\')">';
-    //                 $actionBtn .= csrf_field() . method_field('DELETE');
-    //                 $actionBtn .= '<button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>';
-    //                 $actionBtn .= '</form>';
-                    
-    //                 $actionBtn .= '</div>';
-    //                 return $actionBtn;
-    //             })
-    //             ->rawColumns(['status_badge', 'action'])
-    //             ->make(true);
-    //     }
-
-    //     // Data untuk filter dropdown
-    //     $kecamatans = \App\Models\Kecamatan::all();
-    //     $kelurahans = collect();
-        
-    //     // Jika ada kecamatan_id di request, load kelurahan
-    //     if ($request->has('kecamatan_id') && $request->kecamatan_id) {
-    //         $kelurahans = \App\Models\Kelurahan::where('kecamatan_id', $request->kecamatan_id)->get();
-    //     }
-
-    //     return view('backend.skt_piagam_mt.index', compact('kecamatans', 'kelurahans'));
-    // }
 
     public function index()
     {
