@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Voler Admin Dashboard</title>
+    <title>@yield('title', "Dashboard") - BIMAS Islam Kukar</title>
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="{{ asset('voler/assets/images/logo-kemenag.png') }}" type="image/png">
@@ -36,7 +36,8 @@
         .modal {
             z-index: 1050 !important;
         }
-    </style>
+        </style>
+        @stack('styles')
 </head>
 <body>
     @include('include.sidebar')

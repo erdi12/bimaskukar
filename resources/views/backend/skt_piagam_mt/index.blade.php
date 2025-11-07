@@ -1,4 +1,5 @@
 @extends('layout.app')
+@section('title', 'Surat Keterangan Terdaftar Majelis Ta\'lim')
 @section('sub-layanan', 'active')
 @section('layanan', 'active')
 @section('skt-mt', 'active')

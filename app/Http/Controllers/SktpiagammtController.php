@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Log;
 use Carbon\Carbon;
 use App\Models\Kecamatan;
 use App\Models\Kelurahan;
 use App\Models\Sktpiagammt;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Routing\Controller;
 use Spatie\Browsershot\Browsershot;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
-use yajra\DataTables\Facades\DataTables;
 use Illuminate\Database\QueryException;
 
 class SktpiagammtController extends Controller
@@ -55,7 +55,6 @@ class SktpiagammtController extends Controller
         return $fileName;
     }
 
-
     public function index()
     {
         // Ambil data yang diperlukan
@@ -81,6 +80,117 @@ class SktpiagammtController extends Controller
         
         return view('backend.skt_piagam_mt.index', compact('sktpiagammts', 'kecamatans', 'kelurahans'));
     }
+
+    // public function index(Request $request)
+    // {
+    //     try {
+    //         // Ambil data yang diperlukan untuk filter dropdown
+    //         $kecamatans = Kecamatan::all();
+    //         $kelurahans = collect();
+            
+    //         // Load kelurahan jika ada filter kecamatan
+    //         if ($request->has('kecamatan_id') && $request->kecamatan_id) {
+    //             $kelurahans = Kelurahan::where('kecamatan_id', $request->kecamatan_id)->get();
+    //         }
+
+    //         if ($request->ajax()) {
+    //             $query = Sktpiagammt::with(['kecamatan', 'kelurahan']);
+                
+    //             // Apply filters
+    //             if ($request->has('kecamatan_id') && $request->kecamatan_id) {
+    //                 $query->where('kecamatan_id', $request->kecamatan_id);
+    //             }
+    //             if ($request->has('kelurahan_id') && $request->kelurahan_id) {
+    //                 $query->where('kelurahan_id', $request->kelurahan_id);
+    //             }
+
+    //             return DataTables::of($query)
+    //                 ->addIndexColumn()
+    //                 ->addColumn('status_badge', function($row) {
+    //                     if ($row->status == 'aktif') {
+    //                         return '<span class="badge bg-success">Aktif</span>';
+    //                     } elseif ($row->status == 'nonaktif') {
+    //                         return '<span class="badge bg-danger">Non-Aktif</span>';
+    //                     } else {
+    //                         return '<span class="badge bg-warning">Belum Update</span>';
+    //                     }
+    //                 })
+    //                 ->addColumn('action', function($row) {
+    //                     $actionBtn = '<div class="btn-group btn-group-sm mb-2" role="group">';
+    //                     $actionBtn .= '<button type="button" class="btn btn-success d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#wilayahModal' . $row->id . '">';
+    //                     $actionBtn .= '<i class="fa-regular fa-file-lines me-1"></i> Cetak SKT</button>';
+                        
+    //                     $actionBtn .= '<a href="' . route('skt_piagam_mt.cetak_piagam', $row->id) . '" class="btn btn-warning d-inline-flex align-items-center" target="_blank">';
+    //                     $actionBtn .= '<i class="fa-regular fa-file-lines me-1"></i> Cetak Piagam</a>';
+    //                     $actionBtn .= '</div>';
+                        
+    //                     $actionBtn .= '<div class="btn-group btn-group-sm" role="group">';
+    //                     $actionBtn .= '<a href="' . route('skt_piagam_mt.edit', $row->id) . '" class="btn btn-success d-inline-flex align-items-center">';
+    //                     $actionBtn .= '<i class="fa-regular fa-pen-to-square me-1"></i> Edit</a>';
+                        
+    //                     $actionBtn .= '<button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDelete(' . $row->id . ')">';
+    //                     $actionBtn .= '<i class="fa-regular fa-trash-can me-1"></i> Hapus</button>';
+    //                     $actionBtn .= '</div>';
+                        
+    //                     return $actionBtn;
+    //                 })
+    //                 ->addColumn('documents', function($row) {
+    //                     $docsBtn = '<div class="btn-group btn-group-sm mb-2 text-nowrap">';
+                        
+    //                     // SKT Button
+    //                     if (!$row->file_skt) {
+    //                         $docsBtn .= '<button type="button" class="btn btn-primary d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadSktModal' . $row->id . '">';
+    //                         $docsBtn .= '<i class="fa-solid fa-arrow-up-from-bracket me-1"></i> Upload SKT</button>';
+    //                     } else {
+    //                         $docsBtn .= '<a href="' . asset('storage/skt/' . $row->file_skt) . '" class="btn btn-success d-inline-flex align-items-center" target="_blank">';
+    //                         $docsBtn .= '<i class="fa-regular fa-eye me-1"></i> Lihat SKT</a>';
+                            
+    //                         $docsBtn .= '<button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDeleteSkt(' . $row->id . ')">';
+    //                         $docsBtn .= '<i class="fa-regular fa-trash-can me-1"></i> Hapus SKT</button>';
+    //                     }
+    //                     $docsBtn .= '</div>';
+                        
+    //                     // Piagam Button
+    //                     $docsBtn .= '<div class="btn-group btn-group-sm text-nowrap">';
+    //                     if (!$row->file_piagam) {
+    //                         $docsBtn .= '<button type="button" class="btn btn-info d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadPiagamModal' . $row->id . '">';
+    //                         $docsBtn .= '<i class="fa-solid fa-arrow-up-from-bracket me-1"></i> Upload Piagam</button>';
+    //                     } else {
+    //                         $docsBtn .= '<a href="' . asset('storage/piagam/' . $row->file_piagam) . '" class="btn btn-success d-inline-flex align-items-center" target="_blank">';
+    //                         $docsBtn .= '<i class="fa-regular fa-eye me-1"></i> Lihat Piagam</a>';
+                            
+    //                         $docsBtn .= '<button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDeletePiagam(' . $row->id . ')">';
+    //                         $docsBtn .= '<i class="fa-regular fa-trash-can me-1"></i> Hapus Piagam</button>';
+    //                     }
+    //                     $docsBtn .= '</div>';
+                        
+    //                     return $docsBtn;
+    //                 })
+    //                 ->addColumn('berkas', function($row) {
+    //                     $berkasBtn = '<div class="btn-group btn-group-sm">';
+    //                     if (!$row->file_berkas) {
+    //                         $berkasBtn .= '<button type="button" class="btn btn-info d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadBerkasModal' . $row->id . '">';
+    //                         $berkasBtn .= '<i class="fa-solid fa-arrow-up-from-bracket me-1"></i> Upload Berkas</button>';
+    //                     } else {
+    //                         $berkasBtn .= '<a href="' . asset('storage/berkas/' . $row->file_berkas) . '" class="btn btn-success d-inline-flex align-items-center" target="_blank">';
+    //                         $berkasBtn .= '<i class="fa-regular fa-eye me-1"></i> Lihat Berkas</a>';
+                            
+    //                         $berkasBtn .= '<button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDeleteBerkas(' . $row->id . ')">';
+    //                         $berkasBtn .= '<i class="fa-regular fa-trash-can me-1"></i> Hapus Berkas</button>';
+    //                     }
+    //                     $berkasBtn .= '</div>';
+    //                     return $berkasBtn;
+    //                 })
+    //                 ->rawColumns(['action', 'status_badge', 'documents', 'berkas'])
+    //                 ->make(true);
+    //         }
+
+    //         return view('backend.skt_piagam_mt.index', compact('kecamatans', 'kelurahans'));
+    //     } catch (\Exception $e) {
+    //         Log::error('DataTables Error: ' . $e->getMessage());
+    //         return response()->json(['error' => 'Terjadi kesalahan saat memuat data'], 500);
+    //     }
+    // }
 
     /**
      * Show the form for creating a new resource.
