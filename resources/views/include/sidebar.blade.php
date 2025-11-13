@@ -59,11 +59,11 @@
                         <ul class="submenu ">
                             
                             <li>
-                                <a href="ui-chatbox.html">Kecamatan</a>
+                                <a href="{{ route('kecamatan.index') }}">Kecamatan</a>
                             </li>
                             
                             <li>
-                                <a href="ui-pricing.html">Kelurahan</a>
+                                <a href="{{ route('kelurahan.index') }}">Kelurahan</a>
                             </li>                            
                         </ul>                        
                     </li>

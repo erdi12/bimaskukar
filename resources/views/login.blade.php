@@ -89,7 +89,7 @@
         }
         
         .login-info h1 {
-            font-family: 'ketupat Ramadhan', sans-serif;
+            font-family: 'Ketupat Ramadhan', sans-serif;
             font-size: 2.5rem;
             margin-bottom: 20px;
             color: var(--emas);

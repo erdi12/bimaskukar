@@ -1,0 +1,62 @@
+@extends('layout.app')
+@section('title', 'Edit Kelurahan')
+
+@section('content')
+<div class="main-content container-fluid">
+    <div class="page-title">
+        <h3>Edit Kelurahan</h3>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Form Edit Kelurahan</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('kelurahan.update', $kelurahan->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="mb-3">
+                            <label for="kecamatan_id" class="form-label">Kecamatan <span class="text-danger">*</span></label>
+                            <select class="form-select @error('kecamatan_id') is-invalid @enderror" 
+                                    id="kecamatan_id" name="kecamatan_id" required>
+                                <option value="">-- Pilih Kecamatan --</option>
+                                @foreach($kecamatans as $kecamatan)
+                                    <option value="{{ $kecamatan->id }}" 
+                                        {{ old('kecamatan_id', $kelurahan->kecamatan_id) == $kecamatan->id ? 'selected' : '' }}>
+                                        {{ $kecamatan->kecamatan }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('kecamatan_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="kelurahan" class="form-label">Nama Kelurahan <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('nama_kelurahan') is-invalid @enderror" 
+                                   id="kelurahan" name="nama_kelurahan" value="{{ old('nama_kelurahan', $kelurahan->nama_kelurahan) }}" 
+                                   placeholder="Masukkan nama kelurahan" required>
+                            @error('nama_kelurahan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i data-feather="save"></i> Perbarui
+                            </button>
+                            <a href="{{ route('kelurahan.index') }}" class="btn btn-secondary">
+                                <i data-feather="arrow-left"></i> Kembali
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

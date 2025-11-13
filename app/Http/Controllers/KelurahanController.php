@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kelurahan;
+use App\Models\Kecamatan;
 use Illuminate\Http\Request;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class KelurahanController extends Controller
 {
@@ -11,7 +14,8 @@ class KelurahanController extends Controller
      */
     public function index()
     {
-        //
+        $kelurahans = Kelurahan::with('kecamatan')->orderBy('nama_kelurahan', 'asc')->get();
+        return view('backend.kelurahan.index', compact('kelurahans'));
     }
 
     /**
@@ -19,7 +23,8 @@ class KelurahanController extends Controller
      */
     public function create()
     {
-        //
+        $kecamatans = Kecamatan::orderBy('kecamatan', 'asc')->get();
+        return view('backend.kelurahan.create', compact('kecamatans'));
     }
 
     /**
@@ -27,7 +32,19 @@ class KelurahanController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'kecamatan_id' => 'required|exists:kecamatans,id',
+            'nama_kelurahan' => 'required|string|max:255|unique:kelurahans,nama_kelurahan',
+        ], [
+            'kecamatan_id.required' => 'Kecamatan harus dipilih',
+            'nama_kelurahan.required' => 'Nama Kelurahan harus diisi',
+            'nama_kelurahan.unique' => 'Nama Kelurahan sudah terdaftar',
+        ]);
+
+        Kelurahan::create($request->only('kecamatan_id', 'nama_kelurahan'));
+
+        Alert::success('Berhasil', 'Data Kelurahan berhasil ditambahkan');
+        return redirect()->route('kelurahan.index');
     }
 
     /**
@@ -35,7 +52,8 @@ class KelurahanController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $kelurahan = Kelurahan::with('kecamatan')->findOrFail($id);
+        return view('backend.kelurahan.show', compact('kelurahan'));
     }
 
     /**
@@ -43,7 +61,9 @@ class KelurahanController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $kelurahan = Kelurahan::findOrFail($id);
+        $kecamatans = Kecamatan::orderBy('kecamatan', 'asc')->get();
+        return view('backend.kelurahan.edit', compact('kelurahan', 'kecamatans'));
     }
 
     /**
@@ -51,7 +71,21 @@ class KelurahanController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $kelurahan = Kelurahan::findOrFail($id);
+
+        $request->validate([
+            'kecamatan_id' => 'required|exists:kecamatans,id',
+            'nama_kelurahan' => 'required|string|max:255|unique:kelurahans,nama_kelurahan,' . $id,
+        ], [
+            'kecamatan_id.required' => 'Kecamatan harus dipilih',
+            'nama_kelurahan.required' => 'Nama Kelurahan harus diisi',
+            'nama_kelurahan.unique' => 'Nama Kelurahan sudah terdaftar',
+        ]);
+
+        $kelurahan->update($request->only('kecamatan_id', 'nama_kelurahan'));
+
+        Alert::success('Berhasil', 'Data Kelurahan berhasil diperbarui');
+        return redirect()->route('kelurahan.index');
     }
 
     /**
@@ -59,6 +93,10 @@ class KelurahanController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $kelurahan = Kelurahan::findOrFail($id);
+        $kelurahan->delete();
+
+        Alert::success('Berhasil', 'Data Kelurahan berhasil dihapus');
+        return redirect()->route('kelurahan.index');
     }
 }

@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\SktpiagammtController;
+use App\Http\Controllers\KecamatanController;
+use App\Http\Controllers\KelurahanController;
 
 // Public routes
 Route::get('/', function () {
@@ -28,6 +30,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+    
+    // Kecamatan dan Kelurahan routes
+    Route::resource('kecamatan', KecamatanController::class);
+    Route::resource('kelurahan', KelurahanController::class);
     
     // SKT Piagam MT routes
     // Route::get('/skt_piagam_mt', [SktPiagamMtController::class, 'index'])->name('skt_piagam_mt.index');
