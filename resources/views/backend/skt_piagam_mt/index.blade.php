@@ -46,6 +46,7 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="d-flex flex-wrap justify-content-center justify-content-md-end gap-2 mb-3">
+                                @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importExcelModal">
                                     <i data-feather="file-text"></i> <span class="d-none d-sm-inline">Import Excel</span>
                                 </button>
@@ -55,6 +56,7 @@
                                 <a href="{{ route('skt_piagam_mt.create') }}" class="btn btn-primary">
                                     <i data-feather="plus"></i> <span class="d-none d-sm-inline">Tambah Majelis Ta'lim</span>
                                 </a>
+                                @endif
                                 <a href="{{ route('skt_piagam_mt.rekap') }}" class="btn btn-info">
                                     <i data-feather="file"></i> <span class="d-none d-sm-inline">Rekapan Data</span>
                                 </a>
@@ -180,12 +182,16 @@
                                                 </a>
                                             </div>
                                             <div class="btn-group btn-group-sm" role="group">
+                                                @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
                                                 <a href="{{ route('skt_piagam_mt.edit', $item->id) }}" class="btn btn-success d-inline-flex align-items-center">
                                                     <i class="fa-regular fa-pen-to-square me-1"></i> Edit
                                                 </a>
+                                                @endif
+                                                @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Operator'))
                                                 <button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDelete({{ $item->id }})">
                                                     <i class="fa-regular fa-trash-can me-1"></i> Hapus
                                                 </button>
+                                                @endif
                                             </div>
                                         </td>
 
@@ -193,30 +199,38 @@
                                         <td class="text-wrap">
                                             <div class="btn-group btn-group-sm mb-2 text-nowrap">
                                                 @if(!$item->file_skt)
+                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
                                                     <button type="button" class="btn btn-primary d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadSktModal{{ $item->id }}">
                                                         <i class="fa-solid fa-arrow-up-from-bracket me-1"></i> Upload SKT
                                                     </button>
+                                                    @endif
                                                 @else
                                                     <a href="{{ asset('storage/skt/' . $item->file_skt) }}" class="btn btn-success d-inline-flex align-items-center" target="_blank">
                                                         <i class="fa-regular fa-eye me-1"></i> Lihat SKT
                                                     </a>
+                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Operator'))
                                                     <button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDeleteSkt({{ $item->id }})">
                                                         <i class="fa-regular fa-trash-can me-1"></i> Hapus SKT
                                                     </button>
+                                                    @endif
                                                 @endif
                                             </div>
                                             <div class="btn-group btn-group-sm text-nowrap">
                                                 @if(!$item->file_piagam)
+                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
                                                     <button type="button" class="btn btn-info d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadPiagamModal{{ $item->id }}">
                                                         <i class="fa-solid fa-arrow-up-from-bracket me-1"></i> Upload Piagam
                                                     </button>
+                                                    @endif
                                                 @else
                                                     <a href="{{ asset('storage/piagam/' . $item->file_piagam) }}" class="btn btn-success d-inline-flex align-items-center" target="_blank">
                                                         <i class="fa-regular fa-eye me-1"></i> Lihat Piagam
                                                     </a>
+                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Operator'))
                                                     <button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDeletePiagam({{ $item->id }})">
                                                         <i class="fa-regular fa-trash-can me-1"></i> Hapus Piagam
                                                     </button>
+                                                    @endif
                                                 @endif
                                             </div>
                                         </td>
@@ -225,16 +239,20 @@
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 @if(!$item->file_berkas)
+                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
                                                     <button type="button" class="btn btn-info d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadBerkasModal{{ $item->id }}">
                                                         <i class="fa-solid fa-arrow-up-from-bracket me-1"></i> Upload Berkas
                                                     </button>
+                                                    @endif
                                                 @else
                                                     <a href="{{ asset('storage/berkas/' . $item->file_berkas) }}" class="btn btn-success d-inline-flex align-items-center" target="_blank">
                                                         <i class="fa-regular fa-eye me-1"></i> Lihat Berkas
                                                     </a>
+                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
                                                     <button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDeleteBerkas({{ $item->id }})">
                                                         <i class="fa-regular fa-trash-can me-1"></i> Hapus Berkas
                                                     </button>
+                                                    @endif
                                                 @endif
                                             </div>
                                         </td>

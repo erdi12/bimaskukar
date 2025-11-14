@@ -1,10 +1,10 @@
 @extends('layout.app')
-@section('title', 'Data Kelurahan')
+@section('title', 'Manajemen User')
 
 @section('content')
 <div class="main-content container-fluid">
     <div class="page-title">
-        <h3>Data Kelurahan</h3>
+        <h3>Manajemen User</h3>
     </div>
     
     @if(session('success'))
@@ -25,12 +25,10 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title">Daftar Kelurahan</h4>
-                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor'))
-                    <a href="{{ route('kelurahan.create') }}" class="btn btn-success">
-                        <i data-feather="plus"></i> Tambah Kelurahan
+                    <h4 class="card-title">Daftar User</h4>
+                    <a href="{{ route('user.create') }}" class="btn btn-success">
+                        <i data-feather="plus"></i> Tambah User
                     </a>
-                    @endif
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -38,39 +36,45 @@
                             <thead>
                                 <tr>
                                     <th width="5%">No</th>
-                                    <th>Kecamatan</th>
-                                    <th>Nama Kelurahan</th>
+                                    <th>Nama</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Dibuat</th>
                                     <th width="20%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($kelurahans as $kelurahan)
+                                @forelse($users as $user)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
+                                    <td><strong>{{ $user->name }}</strong></td>
+                                    <td>{{ $user->email }}</td>
                                     <td>
-                                        <span class="badge bg-info">{{ $kelurahan->kecamatan->kecamatan }}</span>
+                                        @forelse($user->roles as $role)
+                                            <span class="badge bg-primary">{{ $role->name }}</span>
+                                        @empty
+                                            <span class="badge bg-secondary">Tidak Ada Role</span>
+                                        @endforelse
                                     </td>
-                                    <td>{{ $kelurahan->nama_kelurahan }}</td>
+                                    <td>{{ $user->created_at->format('d-m-Y') }}</td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="{{ route('kelurahan.show', $kelurahan->id) }}" class="btn btn-info">
+                                            <a href="{{ route('user.show', $user->id) }}" class="btn btn-info">
                                                 <i data-feather="eye"></i> Lihat
                                             </a>
-                                            @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor'))
-                                            <a href="{{ route('kelurahan.edit', $kelurahan->id) }}" class="btn btn-warning">
+                                            <a href="{{ route('user.edit', $user->id) }}" class="btn btn-warning">
                                                 <i data-feather="edit"></i> Edit
                                             </a>
                                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" 
-                                                    data-bs-target="#deleteModal{{ $kelurahan->id }}">
+                                                    data-bs-target="#deleteModal{{ $user->id }}">
                                                 <i data-feather="trash"></i> Hapus
                                             </button>
-                                            @endif
                                         </div>
                                     </td>
                                 </tr>
 
                                 <!-- Delete Modal -->
-                                <div class="modal fade" id="deleteModal{{ $kelurahan->id }}" tabindex="-1">
+                                <div class="modal fade" id="deleteModal{{ $user->id }}" tabindex="-1">
                                     <div class="modal-dialog modal-sm">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -78,11 +82,11 @@
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body">
-                                                Apakah Anda yakin ingin menghapus data kelurahan <strong>{{ $kelurahan->nama_kelurahan }}</strong>?
+                                                Apakah Anda yakin ingin menghapus user <strong>{{ $user->name }}</strong>?
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                <form action="{{ route('kelurahan.destroy', $kelurahan->id) }}" method="POST" style="display: inline;">
+                                                <form action="{{ route('user.destroy', $user->id) }}" method="POST" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger">Hapus</button>
@@ -93,7 +97,7 @@
                                 </div>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">Tidak ada data kelurahan</td>
+                                    <td colspan="6" class="text-center text-muted py-4">Tidak ada data user</td>
                                 </tr>
                                 @endforelse
                             </tbody>
