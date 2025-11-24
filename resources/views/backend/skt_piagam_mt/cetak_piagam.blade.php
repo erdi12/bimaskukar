@@ -10,7 +10,7 @@
     <style>
         @font-face {
             font-family: 'ImprintMTShadow';
-            src: url('data:font/ttf;base64,{{ $fontData }}') format('truetype');
+            src: url('{{ public_path('fonts/imprint-mt-shadow.ttf') }}') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
@@ -26,7 +26,7 @@
 
         .isi-kertas {
             font-family: Arial, Helvetica, sans-serif;
-            margin-top: 0.7cm;
+            margin-top: 0.1cm;
             margin-bottom: 0.2cm;
             margin-left: 0.24cm;
             margin-right: 0.24cm;
@@ -47,7 +47,7 @@
         .kertas {
             border: 2px solid black; /* tebal garis */
             padding: 20px;           /* jarak isi dengan garis */
-            min-height: 100%;        /* biar nutup full halaman */
+            min-height: 90%;        /* biar nutup full halaman */
             box-sizing: border-box;  /* padding dihitung dalam lebar */
         }
         .indented-text {
@@ -67,37 +67,45 @@
         .bio-indent {
             margin-left: 35px;
         }
-            .ttd {
-                font-family: Arial, Helvetica, sans-serif;
-        /* margin-top: 5px; */
-        text-align: left;
-        margin-left: 350px;
-    }
-.row-alamat {
-    display: flex;
-    line-height: 1.5;
-    font-size: 12pt;
-    margin-bottom: 10px;
-    align-items: flex-start; /* biar semua rata atas */
-}
+        .ttd {
+            font-family: Arial, Helvetica, sans-serif;
+            /* margin-top: 5px; */
+            text-align: left;
+            margin-left: 350px;
+        }
 
-.label {
-    min-width: 160px;   /* panjang area label */
-    white-space: nowrap;
-}
+        /* --- AWAL PERUBAAN --- */
+        /* CSS Flexbox lama dihapus dan diganti dengan CSS untuk tabel */
+        
+        /* Hapus CSS ini:
+        .row-alamat { ... }
+        .label { ... }
+        .colon { ... }
+        .isi { ... }
+        */
 
-.colon {
-    width: 70px;        /* kolom khusus untuk ":" */
-    text-align: center;
-}
-
-.isi {
-    flex: 1;            /* biar sisa ruang dipakai isi */
-    word-wrap: break-word;
-    white-space: normal;
-}
-
-
+        /* Ganti dengan CSS baru untuk tabel */
+        .alamat-table {
+            width: 100%;
+            border-collapse: collapse; /* Menghilangkan jarak antar sel */
+            font-size: 12pt;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .alamat-table td {
+            padding: 0; /* Hapus padding default tabel */
+            vertical-align: top; /* Sejajarkan teks di atas, mirip 'align-items: flex-start' */
+        }
+        .alamat-table .label-td {
+            width: 160px; /* Lebar tetap untuk label */
+            white-space: nowrap; /* Mencegah teks label pecah baris */
+        }
+        .alamat-table .colon-td {
+            width: 70px; /* Lebar tetap untuk titik dua */
+            text-align: center; /* Ratakan tengah titik dua */
+        }
+        
+        /* --- AKHIR PERUBAAN --- */
 
     </style>
 </head>
@@ -115,34 +123,51 @@
             </div>
             <p class="indented-text">Kepala Kantor Kementerian Agama Kabupaten Kutai Kartanegara dengan merujuk kepada peraturan Menteri Agama Nomor 29 Tahun 2019, dengan ini memberikan Piagam Penyelenggaraan Majelis Ta'lim kepada :</p>
             <div class="bio">
-                <p>1.<span style="margin-left: 5px; margin-right: 64px;">Nama Majelis Ta'lim</span> : <span  style="margin-right: 28px;"></span><strong>{{ $sktpiagammt->nama_majelis }}</strong></p>
-                <p>2.<span style="margin-left: 5px; margin-right: 97px;">Nomor Statistik</span> : <span style="margin-right: 28px;"></span><strong>{{ $sktpiagammt->nomor_statistik }}</strong></p>
+                <p>1.
+                    <span style="margin-left: 5px; margin-right: 57px;">Nama Majelis Ta'lim</span>
+                    :
+                    <span  style="margin-left: 26px;">
+                        <strong>{{ $sktpiagammt->nama_majelis }}</strong>
+                    </span>
+                </p>
+                <p>2.
+                    <span style="margin-left: 5px; margin-right: 92px;">Nomor Statistik</span>
+                    :
+                    <span style="margin-left: 26px;">
+                        <strong>{{ $sktpiagammt->nomor_statistik }}</strong>
+                    </span>
+                </p>
                 <p>3.<span style="margin-left: 5px;">Alamat</span></p>
-                <!-- Di bagian tabel -->
-                {{-- <p>a. Jalan <span style="margin-left: 143px;"> : <span class="text-wrap">{{ $sktpiagammt->alamat }}</span></p> --}}
+                
+                <!-- --- AWAL PERUBAAN DI HTML --- -->
+                <!-- Struktur div lama diganti dengan tabel -->
                 <div class="bio-indent">
-                    <div class="row-alamat">
-                        <div class="label">a. Jalan</div>
-                        <div class="colon">:</div>
-                        <div class="isi">{{ $sktpiagammt->alamat }}</div>
-                    </div>
-                    <div class="row-alamat">
-                        <div class="label">b. Kelurahan/Desa</div>
-                        <div class="colon">:</div>
-                        <div class="isi">{{ $sktpiagammt->kelurahan->nama_kelurahan }}</div>
-                    </div>
-                    <div class="row-alamat">
-                        <div class="label">c. Kecamatan</div>
-                        <div class="colon">:</div>
-                        <div class="isi">{{ ucwords($sktpiagammt->kecamatan->kecamatan) }}</div>
-                    </div>
-                    <div class="row-alamat">
-                        <div class="label">d. Kabupaten</div>
-                        <div class="colon">:</div>
-                        <div class="isi">Kutai Kartanegara</div>
-                    </div>
+                    <table class="alamat-table">
+                        <tr>
+                            <td class="label-td">a. Jalan</td>
+                            <td class="colon-td">:</td>
+                            <td>{{ $sktpiagammt->alamat }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label-td">b. Kelurahan/Desa</td>
+                            <td class="colon-td">:</td>
+                            <td>{{ $sktpiagammt->kelurahan->nama_kelurahan }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label-td">c. Kecamatan</td>
+                            <td class="colon-td">:</td>
+                            <td>{{ ucwords($sktpiagammt->kecamatan->kecamatan) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label-td">d. Kabupaten</td>
+                            <td class="colon-td">:</td>
+                            <td>Kutai Kartanegara</td>
+                        </tr>
+                    </table>
                 </div>
-                <p>4.<span style="margin-left: 5px; margin-right: 50px;">Tanggal/Tahun Berdiri</span> : <span style="margin-left: 28px;">{{ \Carbon\Carbon::parse($sktpiagammt->tanggal_berdiri)->locale('id')->isoFormat('D MMMM Y') }}</span></p>
+                <!-- --- AKHIR PERUBAAN DI HTML --- -->
+
+                <p>4.<span style="margin-left: 5px; margin-right: 46px;">Tanggal/Tahun Berdiri</span> : <span style="margin-left: 28px;">{{ \Carbon\Carbon::parse($sktpiagammt->tanggal_berdiri)->locale('id')->isoFormat('D MMMM Y') }}</span></p>
             </div>
             <p class="indented-text">Kepada Majelis Ta’lim tersebut diberikan hak untuk menyelenggarakan pendidikan dan pengajaran Agama Islam sesuai dengan aturan yang berlaku selama tidak melanggar ketentuan, Undang-Undang dan melakukan ajaran penyimpangan.</p>
             <div class="ttd">

@@ -338,7 +338,7 @@
                                     <div class="modal fade" id="wilayahModal{{ $item->id }}" tabindex="-1" data-bs-backdrop="static" aria-labelledby="wilayahModalLabel{{ $item->id }}" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
-                                            <form action="/skt_piagam_mt/{{ $item->id }}/cetak-skt" method="GET" target="_blank">
+                                            <form action="/skt-piagam-mt/{{ $item->id }}/cetak-skt" method="GET" target="_blank">
                                                 <div class="modal-header">
                                                 <h5 class="modal-title" id="wilayahModalLabel{{ $item->id }}">Pilih Tipe Wilayah</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -419,15 +419,15 @@
     @csrf
     @method('DELETE')
 </form>
-<form id="delete-skt-form-{{ $item->id }}" action="/skt_piagam_mt/delete-skt/{{ $item->id }}" method="POST" style="display: none;">
+<form id="delete-skt-form-{{ $item->id }}" action="/skt-piagam-mt/delete-skt/{{ $item->id }}" method="POST" style="display: none;">
     @csrf
     @method('DELETE')
 </form>
-<form id="delete-piagam-form-{{ $item->id }}" action="/skt_piagam_mt/delete-piagam/{{ $item->id }}" method="POST" style="display: none;">
+<form id="delete-piagam-form-{{ $item->id }}" action="/skt-piagam-mt/delete-piagam/{{ $item->id }}" method="POST" style="display: none;">
     @csrf
     @method('DELETE')
 </form>
-<form id="delete-berkas-form-{{ $item->id }}" action="/skt_piagam_mt/delete-berkas/{{ $item->id }}" method="POST" style="display: none;">
+<form id="delete-berkas-form-{{ $item->id }}" action="/skt-piagam-mt/delete-berkas/{{ $item->id }}" method="POST" style="display: none;">
     @csrf
     @method('DELETE')
 </form>
