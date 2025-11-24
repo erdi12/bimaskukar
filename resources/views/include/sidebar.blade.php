@@ -68,13 +68,30 @@
                         </ul>                        
                     </li>
 
+                    @if(auth()->check() && (auth()->user()->hasRole('Admin')))
+                    <li class="sidebar-item">
+                        <a href="{{ route('role.index') }}" class='sidebar-link'>
+                            <i data-feather="shield" width="20"></i> 
+                            <span>Manajemen Role</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('user.index') }}" class='sidebar-link'>
+                            <i data-feather="users" width="20"></i> 
+                            <span>Manajemen User</span>
+                        </a>
+                    </li>
+                    @endif
+
                 <li class='sidebar-title'>Tong Sampah</li>
                 <li class="sidebar-item @yield('trash')">
                     <a href="{{ route('skt_piagam_mt.trash') }}" class='sidebar-link'>
                             <i data-feather="book-open"></i>
                             <span>Majelis Taklim</span>
                     </a>
-                </li>                     
+                </li>    
+                
         </ul>
     </div>
     <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>

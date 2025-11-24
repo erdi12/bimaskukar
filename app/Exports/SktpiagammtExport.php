@@ -49,9 +49,13 @@ class SktpiagammtExport implements FromCollection, WithHeadings, WithMapping
             $row->nomor_statistik,
             $row->nama_majelis,
             $row->alamat,
-            $row->kelurahan ? $row->kelurahan->id : '',
-            $row->kecamatan ? $row->kecamatan->id : '',
-            $row->tanggal_berdiri,
+            $row->kelurahan 
+                ? ucwords(strtolower($row->kelurahan->nama_kelurahan)) 
+                : '',
+            $row->kecamatan 
+                ? ucwords(strtolower($row->kecamatan->kecamatan)) 
+                : '',
+            Carbon::parse($row->tanggal_berdiri)->locale('id')->format('j F Y'),
             $row->status,
             $row->ketua,
             $row->no_hp,

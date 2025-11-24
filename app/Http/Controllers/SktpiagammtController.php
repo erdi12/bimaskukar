@@ -7,15 +7,16 @@ use App\Models\Kecamatan;
 use App\Models\Kelurahan;
 use App\Models\Sktpiagammt;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Barryvdh\DomPDF\PDF as DOMPDF;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Spatie\Browsershot\Browsershot;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
-use Illuminate\Database\QueryException;
+use Yajra\DataTables\Facades\DataTables;
 
 class SktpiagammtController extends Controller
 {
@@ -322,50 +323,37 @@ class SktpiagammtController extends Controller
     public function cetakPiagam($id)
     {
         try {
-            $sktpiagammt = Sktpiagammt::findOrFail($id);
+            $sktpiagammt = Sktpiagammt::with(['kecamatan', 'kelurahan'])->findOrFail($id);
+            
+            // Debug: lihat struktur data
+            \Log::info('Data Sktpiagammt:', $sktpiagammt->toArray());
+            
             $logoPath = public_path('images/kemenag/kemenag.png');
             $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
-            // di Controller
-            $fontPath = public_path('fonts/imprint-mt-shadow.ttf');
-            $fontData = base64_encode(file_get_contents($fontPath));
 
+            // Generate PDF menggunakan DomPDF
+            $pdf = Pdf::loadView('backend.skt_piagam_mt.cetak_piagam', compact('sktpiagammt', 'logoBase64'))
+            ->setPaper('A4')
+            ->setOption('margin-top', 10)
+            ->setOption('margin-right', 10)
+            ->setOption('margin-bottom', 10)
+            ->setOption('margin-left', 10)
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('chroot', public_path());
             
-            // Tambahkan variabel yang diperlukan untuk template
-            
-            // Render view ke HTML dengan semua variabel yang diperlukan
-            $html = view('backend.skt_piagam_mt.cetak_piagam', compact(
-                'sktpiagammt', 'logoBase64', 'fontData'))->render();
-            
-            // Simpan HTML ke file temporary dengan path absolut
-            $tempPath = storage_path('app/public/temp');
-            if (!file_exists($tempPath)) {
-                mkdir($tempPath, 0755, true);
+            // Register custom font ke DomPDF
+            $fontPath = public_path('fonts/imprint-mt-shadow.ttf');
+            if (file_exists($fontPath)) {
+                $pdf->getDomPDF()->getOptions()->set('fontDir', public_path('fonts'));
+                $pdf->getDomPDF()->getOptions()->set('fontCache', storage_path('logs'));
             }
             
-            $tempFile = $tempPath . '/skt_' . time() . '.html';
-            file_put_contents($tempFile, $html);
-            
-            // Generate PDF dengan Browsershot dengan konfigurasi lebih detail
-            $pdf = Browsershot::html(file_get_contents($tempFile))
-                ->format('A4')
-                ->margins(10, 10, 10, 10) // Tambahkan margin untuk mencegah konten menyentuh bingkai
-                ->showBackground()
-                ->waitUntilNetworkIdle()
-                ->timeout(120)
-                ->pdf();
-                
-            // Hapus file temporary
-            @unlink($tempFile);
-            
-            // Kembalikan respons PDF dengan header yang benar
-            // Buat nama file yang sesuai format: "nomor_statistik - nama_majelis - SKT"
+            // Buat nama file yang sesuai format: "nomor_statistik - nama_majelis - Piagam"
             $fileName = $sktpiagammt->nomor_statistik . ' - ' . $sktpiagammt->nama_majelis . ' - Piagam.pdf';
             // Bersihkan karakter yang tidak valid untuk nama file
             $fileName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $fileName);
             
-            return response($pdf)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
+            return $pdf->stream($fileName);
                 
         } catch (\Exception $e) {
             // Log error
@@ -379,6 +367,66 @@ class SktpiagammtController extends Controller
         }
     }
 
+    // public function cetakPiagam($id)
+    // {
+    //     try {
+    //         $sktpiagammt = Sktpiagammt::findOrFail($id);
+    //         $logoPath = public_path('images/kemenag/kemenag.png');
+    //         $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+    //         // di Controller
+    //         $fontPath = public_path('fonts/imprint-mt-shadow.ttf');
+    //         $fontData = base64_encode(file_get_contents($fontPath));
+
+            
+    //         // Tambahkan variabel yang diperlukan untuk template
+            
+    //         // Render view ke HTML dengan semua variabel yang diperlukan
+    //         $html = view('backend.skt_piagam_mt.cetak_piagam', compact(
+    //             'sktpiagammt', 'logoBase64', 'fontData'))->render();
+            
+    //         // Simpan HTML ke file temporary dengan path absolut
+    //         $tempPath = storage_path('app/public/temp');
+    //         if (!file_exists($tempPath)) {
+    //             mkdir($tempPath, 0755, true);
+    //         }
+            
+    //         $tempFile = $tempPath . '/skt_' . time() . '.html';
+    //         file_put_contents($tempFile, $html);
+            
+    //         // Generate PDF dengan Browsershot dengan konfigurasi lebih detail
+    //         $pdf = Browsershot::html(file_get_contents($tempFile))
+    //             ->format('A4')
+    //             ->margins(10, 10, 10, 10) // Tambahkan margin untuk mencegah konten menyentuh bingkai
+    //             ->showBackground()
+    //             ->waitUntilNetworkIdle()
+    //             ->timeout(120)
+    //             ->pdf();
+                
+    //         // Hapus file temporary
+    //         @unlink($tempFile);
+            
+    //         // Kembalikan respons PDF dengan header yang benar
+    //         // Buat nama file yang sesuai format: "nomor_statistik - nama_majelis - SKT"
+    //         $fileName = $sktpiagammt->nomor_statistik . ' - ' . $sktpiagammt->nama_majelis . ' - Piagam.pdf';
+    //         // Bersihkan karakter yang tidak valid untuk nama file
+    //         $fileName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $fileName);
+            
+    //         return response($pdf)
+    //             ->header('Content-Type', 'application/pdf')
+    //             ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
+                
+    //     } catch (\Exception $e) {
+    //         // Log error
+    //         \Log::error('PDF Generation Error: ' . $e->getMessage());
+            
+    //         // Tampilkan pesan error yang lebih informatif
+    //         return response()->view('errors.custom', [
+    //             'message' => 'Gagal membuat PDF: ' . $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ], 500);
+    //     }
+    // }
+
     public function cetakSkt($id, Request $request)
     {
         try {
@@ -389,42 +437,33 @@ class SktpiagammtController extends Controller
             // Ambil tipe wilayah dari request, default ke 'kelurahan' jika tidak ada
             $tipeWilayah = $request->query('tipe', 'kelurahan');
             
-            // Tambahkan variabel yang diperlukan untuk template
+            // Generate PDF menggunakan DomPDF
+            $pdf = Pdf::loadView('backend.skt_piagam_mt.cetak_skt', [
+                'sktpiagammt' => $sktpiagammt,
+                'logoBase64' => $logoBase64,
+                'tipeWilayah' => $tipeWilayah
+            ])
+            ->setPaper('A4')
+            ->setOption('margin-top', 10)
+            ->setOption('margin-right', 10)
+            ->setOption('margin-bottom', 10)
+            ->setOption('margin-left', 10)
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('chroot', public_path());
             
-            // Render view ke HTML dengan semua variabel yang diperlukan
-            $html = view('backend.skt_piagam_mt.cetak_skt', compact(
-                'sktpiagammt', 'logoBase64', 'tipeWilayah'))->render();
-            
-            // Simpan HTML ke file temporary dengan path absolut
-            $tempPath = storage_path('app/public/temp');
-            if (!file_exists($tempPath)) {
-                mkdir($tempPath, 0755, true);
+            // Register custom font ke DomPDF
+            $fontPath = public_path('fonts/imprint-mt-shadow.ttf');
+            if (file_exists($fontPath)) {
+                $pdf->getDomPDF()->getOptions()->set('fontDir', public_path('fonts'));
+                $pdf->getDomPDF()->getOptions()->set('fontCache', storage_path('logs'));
             }
             
-            $tempFile = $tempPath . '/skt_' . time() . '.html';
-            file_put_contents($tempFile, $html);
-            
-            // Generate PDF dengan Browsershot dengan konfigurasi lebih detail
-            $pdf = Browsershot::html(file_get_contents($tempFile))
-                ->format('A4')
-                ->margins(10, 10, 10, 10) // Tambahkan margin untuk mencegah konten menyentuh bingkai
-                ->showBackground()
-                ->waitUntilNetworkIdle()
-                ->timeout(120)
-                ->pdf();
-                
-            // Hapus file temporary
-            @unlink($tempFile);
-            
-            // Kembalikan respons PDF dengan header yang benar
             // Buat nama file yang sesuai format: "nomor_statistik - nama_majelis - SKT"
             $fileName = $sktpiagammt->nomor_statistik . ' - ' . $sktpiagammt->nama_majelis . ' - SKT.pdf';
             // Bersihkan karakter yang tidak valid untuk nama file
             $fileName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $fileName);
             
-            return response($pdf)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
+            return $pdf->stream($fileName);
                 
         } catch (\Exception $e) {
             // Log error
@@ -908,6 +947,20 @@ class SktpiagammtController extends Controller
             Alert::error('Gagal', 'Gagal menghapus data permanen. ' . $e->getMessage());
             
             return redirect()->route('skt_piagam_mt.trash');
+        }
+    }
+
+    // Preview piagam sebagai HTML (untuk debugging)
+    public function previewPiagam($id)
+    {
+        try {
+            $sktpiagammt = Sktpiagammt::with(['kecamatan', 'kelurahan'])->findOrFail($id);
+            $logoPath = public_path('images/kemenag/kemenag.png');
+            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            
+            return view('backend.skt_piagam_mt.cetak_piagam', compact('sktpiagammt', 'logoBase64'));
+        } catch (\Exception $e) {
+            return response('Record tidak ditemukan', 404);
         }
     }
 }
