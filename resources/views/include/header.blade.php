@@ -52,14 +52,24 @@
                                 <div class="avatar me-1">
                                     <img src="{{ asset('voler/assets/images/avatar/avatar-s-1.png') }}" alt="" srcset="">
                                 </div>
-                                <div class="d-none d-md-block d-lg-inline-block">Hi, Saugi</div>
+                                <div class="d-none d-md-block d-lg-inline-block">
+                                    @auth
+                                        Hi, {{ auth()->user()->name }}
+                                    @else
+                                        Hi, Tamu. Kamu adalah Pengunjung
+                                    @endauth
+                                </div>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#"><i data-feather="user"></i> Account</a>
-                                <a class="dropdown-item active" href="#"><i data-feather="mail"></i> Messages</a>
-                                <a class="dropdown-item" href="#"><i data-feather="settings"></i> Settings</a>
+                                <h6 class='py-2 px-4'>
+                                    @auth
+                                        Kamu adalah {{ optional(auth()->user()->roles->first())->name ?? 'User' }}
+                                    @else
+                                        Kamu adalah Pengunjung
+                                    @endauth
+                                </h6>
                                 <div class="dropdown-divider"></div>
-                                 <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i data-feather="log-out"></i> Logout</a>
+                                    <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i data-feather="log-out"></i> Logout</a>
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                     @csrf
                                 </form>

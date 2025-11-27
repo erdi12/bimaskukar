@@ -26,9 +26,11 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title">Daftar Kecamatan</h4>
+                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor'))
                     <a href="{{ route('kecamatan.create') }}" class="btn btn-success">
                         <i data-feather="plus"></i> Tambah Kecamatan
                     </a>
+                    @endif
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -50,6 +52,7 @@
                                             <a href="{{ route('kecamatan.show', $kecamatan->id) }}" class="btn btn-info">
                                                 <i data-feather="eye"></i> Lihat
                                             </a>
+                                            @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor'))
                                             <a href="{{ route('kecamatan.edit', $kecamatan->id) }}" class="btn btn-warning">
                                                 <i data-feather="edit"></i> Edit
                                             </a>
@@ -57,6 +60,7 @@
                                                     data-bs-target="#deleteModal{{ $kecamatan->id }}">
                                                 <i data-feather="trash"></i> Hapus
                                             </button>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
