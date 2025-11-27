@@ -12,6 +12,12 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+    .sticky-column {
+        position: sticky;
+        left: 0;
+        background-color: #fff;
+        z-index: 1;
+    }
 </style>
 @endpush
 
@@ -127,7 +133,7 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nomor Statistik MT</th>
-                                    <th>Nama Majelis Ta'lim</th>
+                                    <th class="sticky-column">Nama Majelis Ta'lim</th>
                                     <th>Alamat</th>
                                     <th>Kelurahan</th>
                                     <th>Kecamatan</th>
@@ -146,7 +152,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $item->nomor_statistik }}</td>
-                                        <td>{{ $item->nama_majelis }}</td>
+                                        <td class="sticky-column">{{ $item->nama_majelis }}</td>
                                         <td>{{ $item->alamat }}</td>
                                         <td>{{ $item->kelurahan->nama_kelurahan }}</td>
                                         <td>{{ ucfirst($item->kecamatan->kecamatan) }}</td>

@@ -76,7 +76,7 @@ class SktpiagammtController extends Controller
         }
         
         // Ambil semua data
-        $sktpiagammts = $query->orderBy('created_at', 'desc')->get();
+        $sktpiagammts = $query->orderBy('mendaftar', 'desc')->get();
         
         return view('backend.skt_piagam_mt.index', compact('sktpiagammts', 'kecamatans', 'kelurahans'));
     }
