@@ -159,7 +159,9 @@
                                         <td>{{ $item->kelurahan->nama_kelurahan }}</td>
                                         <td>{{ ucfirst($item->kecamatan->kecamatan) }}</td>
                                         <td class="text-center">
-                                            @if($item->status == 'aktif')
+                                            @if($item->mendaftar_ulang && \Carbon\Carbon::today()->gte(\Carbon\Carbon::parse($item->mendaftar_ulang)))
+                                                <span class="badge bg-warning">Belum Update</span>
+                                            @elseif($item->status == 'aktif')
                                                 <span class="badge bg-success">Aktif</span>
                                             @elseif($item->status == 'nonaktif')
                                                 <span class="badge bg-danger">Non-Aktif</span>

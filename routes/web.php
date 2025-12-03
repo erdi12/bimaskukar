@@ -43,8 +43,7 @@ Route::middleware(['auth'])->group(function () {
     */
 
     Route::get('kecamatan', [KecamatanController::class, 'index'])->name('kecamatan.index');
-    Route::get('kecamatan/{kecamatan}', [KecamatanController::class, 'show'])->name('kecamatan.show');
-
+    
     Route::middleware(['role:Admin,Editor'])->group(function () {
         Route::get('kecamatan/create', [KecamatanController::class, 'create'])->name('kecamatan.create');
         Route::post('kecamatan', [KecamatanController::class, 'store'])->name('kecamatan.store');
@@ -52,6 +51,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('kecamatan/{kecamatan}', [KecamatanController::class, 'update'])->name('kecamatan.update');
         Route::delete('kecamatan/{kecamatan}', [KecamatanController::class, 'destroy'])->name('kecamatan.destroy');
     });
+    
+    Route::get('kecamatan/{kecamatan}', [KecamatanController::class, 'show'])
+        ->whereNumber('kecamatan')
+        ->name('kecamatan.show');
 
     /*
     |--------------------------------------------------------------------------
@@ -60,7 +63,7 @@ Route::middleware(['auth'])->group(function () {
     */
 
     Route::get('kelurahan', [KelurahanController::class, 'index'])->name('kelurahan.index');
-    Route::get('kelurahan/{kelurahan}', [KelurahanController::class, 'show'])->name('kelurahan.show');
+
 
     Route::middleware(['role:Admin,Editor'])->group(function () {
         Route::get('kelurahan/create', [KelurahanController::class, 'create'])->name('kelurahan.create');
@@ -69,6 +72,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('kelurahan/{kelurahan}', [KelurahanController::class, 'update'])->name('kelurahan.update');
         Route::delete('kelurahan/{kelurahan}', [KelurahanController::class, 'destroy'])->name('kelurahan.destroy');
     });
+
+    Route::get('kelurahan/{kelurahan}', [KelurahanController::class, 'show'])
+        ->whereNumber('kelurahan')
+        ->name('kelurahan.show');
 
     /*
     |--------------------------------------------------------------------------
@@ -133,8 +140,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin & Editor only
     Route::middleware(['role:Admin,Editor'])->group(function () {
-        Route::delete('/skt_piagam_mt/{skt_piagam_mt}', [SktpiagammtController::class, 'destroy'])->name('skt_piagam_mt.destroy');
-        Route::delete('/skt_piagam_mt/{id}/force-delete', [SktpiagammtController::class, 'forceDelete'])->name('skt_piagam_mt.force_delete');
+        Route::delete('/skt-piagam-mt/{skt_piagam_mt}', [SktpiagammtController::class, 'destroy'])->name('skt_piagam_mt.destroy');
+        Route::delete('/skt-piagam-mt/{id}/force-delete', [SktpiagammtController::class, 'forceDelete'])->name('skt_piagam_mt.force_delete');
     });
 
     // Route Cetak - urutan sebelum route {id}
