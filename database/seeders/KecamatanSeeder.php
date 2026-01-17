@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Kecamatan;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class KecamatanSeeder extends Seeder
 {
@@ -14,26 +13,26 @@ class KecamatanSeeder extends Seeder
     public function run(): void
     {
         $kecamatans = [
-            "anggana",
-            "kembang janggut",
-            "kenohan",
-            "kota bangun",
-            "kota bangun darat",
-            "loa janan",
-            "loa kulu",
-            "marang kayu",
-            "muara badak",
-            "muara jawa",
-            "muara kaman",
-            "muara muntai",
-            "muara wis",
-            "samboja",
-            "sanga sanga",
-            "sebulu",
-            "samboja barat",
-            "tabang",
-            "tenggarong",
-            "tenggarong seberang"
+            'anggana',
+            'kembang janggut',
+            'kenohan',
+            'kota bangun',
+            'kota bangun darat',
+            'loa janan',
+            'loa kulu',
+            'marangkayu',
+            'muara badak',
+            'muara jawa',
+            'muara kaman',
+            'muara muntai',
+            'muara wis',
+            'samboja',
+            'sangasanga',
+            'sebulu',
+            'samboja barat',
+            'tabang',
+            'tenggarong',
+            'tenggarong seberang',
         ];
 
         foreach ($kecamatans as $kecamatan) {

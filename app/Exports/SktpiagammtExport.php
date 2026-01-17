@@ -33,6 +33,8 @@ class SktpiagammtExport implements FromCollection, WithHeadings, WithMapping
             'status',
             'ketua',
             'no_hp',
+            'jumlah_anggota',
+            'materi',
             'mendaftar',
             'mendaftar_ulang'
         ];
@@ -45,11 +47,21 @@ class SktpiagammtExport implements FromCollection, WithHeadings, WithMapping
      */
     public function map($row): array
     {
+        // Format alamat lengkap
+        $alamatLengkap = $row->alamat;
+        if ($row->kelurahan) {
+            $jenis = $row->kelurahan->jenis_kelurahan == 'Desa' ? 'Desa' : 'Kel.';
+            $alamatLengkap .= ', ' . $jenis . ' ' . ucwords(strtolower($row->kelurahan->nama_kelurahan));
+        }
+        if ($row->kecamatan) {
+            $alamatLengkap .= ', Kec. ' . ucwords(strtolower($row->kecamatan->kecamatan));
+        }
+
         return [
             $row->nomor_statistik,
             $row->nama_majelis,
-            $row->alamat,
-            $row->kelurahan 
+            $alamatLengkap,
+            $row->kelurahan
                 ? ucwords(strtolower($row->kelurahan->nama_kelurahan)) 
                 : '',
             $row->kecamatan 
@@ -59,6 +71,8 @@ class SktpiagammtExport implements FromCollection, WithHeadings, WithMapping
             $row->status,
             $row->ketua,
             $row->no_hp,
+            $row->jumlah_anggota,
+            $row->materi,
             Carbon::parse($row->mendaftar)->locale('id')->format('j F Y'),
             Carbon::parse($row->mendaftar_ulang)->locale('id')->format('j F Y')
         ];

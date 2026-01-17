@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Role;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -26,7 +25,7 @@ class UserSeeder extends Seeder
 
         // Assign role Admin
         $adminRole = Role::where('name', 'Admin')->first();
-        if ($adminRole && !$adminUser->roles()->where('role_id', $adminRole->id)->exists()) {
+        if ($adminRole && ! $adminUser->roles()->where('role_id', $adminRole->id)->exists()) {
             $adminUser->roles()->attach($adminRole->id);
         }
 
@@ -41,7 +40,7 @@ class UserSeeder extends Seeder
 
         // Assign role Editor
         $editorRole = Role::where('name', 'Editor')->first();
-        if ($editorRole && !$editorUser->roles()->where('role_id', $editorRole->id)->exists()) {
+        if ($editorRole && ! $editorUser->roles()->where('role_id', $editorRole->id)->exists()) {
             $editorUser->roles()->attach($editorRole->id);
         }
 
@@ -56,7 +55,7 @@ class UserSeeder extends Seeder
 
         // Assign role Operator
         $operatorRole = Role::where('name', 'Operator')->first();
-        if ($operatorRole && !$operatorUser->roles()->where('role_id', $operatorRole->id)->exists()) {
+        if ($operatorRole && ! $operatorUser->roles()->where('role_id', $operatorRole->id)->exists()) {
             $operatorUser->roles()->attach($operatorRole->id);
         }
 
@@ -71,7 +70,7 @@ class UserSeeder extends Seeder
 
         // Assign role Viewer
         $viewerRole = Role::where('name', 'Viewer')->first();
-        if ($viewerRole && !$viewerUser->roles()->where('role_id', $viewerRole->id)->exists()) {
+        if ($viewerRole && ! $viewerUser->roles()->where('role_id', $viewerRole->id)->exists()) {
             $viewerUser->roles()->attach($viewerRole->id);
         }
 

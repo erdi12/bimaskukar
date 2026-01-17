@@ -191,7 +191,7 @@
                 <div class="data-label">Alamat</div>
                 <div class="data-colon">:</div>
                 <div class="data-isi">
-                    {{ $sktpiagammt->alamat }}, {{ $tipeWilayah == 'desa' ? 'Desa' : 'Kel.' }} {{ $sktpiagammt->kelurahan->nama_kelurahan }}, Kec. {{ ucwords($sktpiagammt->kecamatan->kecamatan) }}
+                    {{ $sktpiagammt->alamat }}, {{ $sktpiagammt->kelurahan->jenis_kelurahan == 'Desa' ? 'Desa' : 'Kel.' }} {{ $sktpiagammt->kelurahan->nama_kelurahan }}, Kec. {{ ucwords($sktpiagammt->kecamatan->kecamatan) }}
                 </div>
             </div>
             <!-- --- AKHIR PERUBAAN HTML: Data Surat (Lanjutan) --- -->

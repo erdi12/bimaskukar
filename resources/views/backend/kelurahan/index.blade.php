@@ -33,6 +33,21 @@
                     @endif
                 </div>
                 <div class="card-body">
+                    <form action="{{ route('kelurahan.index') }}" method="GET" class="mb-3">
+                        <div class="row align-items-end">
+                            <div class="col-md-4">
+                                <label for="kecamatan_filter" class="form-label">Filter Kecamatan</label>
+                                <select class="form-select" id="kecamatan_filter" name="kecamatan_filter" onchange="this.form.submit()">
+                                    <option value="">-- Semua Kecamatan --</option>
+                                    @foreach($kecamatans as $kec)
+                                        <option value="{{ $kec->id }}" {{ request('kecamatan_filter') == $kec->id ? 'selected' : '' }}>
+                                            {{ $kec->kecamatan }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </form>
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead>
@@ -40,6 +55,7 @@
                                     <th width="5%">No</th>
                                     <th>Kecamatan</th>
                                     <th>Nama Kelurahan</th>
+                                    <th>Jenis</th>
                                     <th width="20%">Aksi</th>
                                 </tr>
                             </thead>
@@ -51,6 +67,11 @@
                                         <span class="badge bg-info">{{ $kelurahan->kecamatan->kecamatan }}</span>
                                     </td>
                                     <td>{{ $kelurahan->nama_kelurahan }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $kelurahan->jenis_kelurahan == 'Desa' ? 'success' : 'primary' }}">
+                                            {{ $kelurahan->jenis_kelurahan }}
+                                        </span>
+                                    </td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="{{ route('kelurahan.show', $kelurahan->id) }}" class="btn btn-info">
@@ -93,7 +114,7 @@
                                 </div>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">Tidak ada data kelurahan</td>
+                                    <td colspan="5" class="text-center text-muted py-4">Tidak ada data kelurahan</td>
                                 </tr>
                                 @endforelse
                             </tbody>

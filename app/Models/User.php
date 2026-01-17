@@ -6,11 +6,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, LogsActivity, Notifiable;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -63,12 +72,26 @@ class User extends Authenticatable
     }
 
     /**
+     * Cek apakah user memiliki salah satu dari role yang diberikan
+     *
+     * @param  array|string  $roles
+     */
+    public function hasAnyRole($roles)
+    {
+        if (is_array($roles)) {
+            return $this->roles()->whereIn('name', $roles)->exists();
+        }
+
+        return $this->hasRole($roles);
+    }
+
+    /**
      * Assign role ke user
      */
     public function assignRole($roleName)
     {
         $role = Role::where('name', $roleName)->firstOrFail();
-        if (!$this->roles()->where('role_id', $role->id)->exists()) {
+        if (! $this->roles()->where('role_id', $role->id)->exists()) {
             $this->roles()->attach($role->id);
         }
     }

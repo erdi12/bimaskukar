@@ -137,16 +137,12 @@
                                     <th>Nomor Statistik MT</th>
                                     <th class="sticky-column">Nama Majelis Ta'lim</th>
                                     <th>Alamat</th>
-                                    <th>Kelurahan</th>
-                                    <th>Kecamatan</th>
                                     <th>Status</th>
                                     <th>Ketua</th>
                                     <th>No. HP</th>
                                     <th>Mendaftar</th>
                                     <th>Daftar Ulang</th>
                                     <th>Aksi</th>
-                                    <th>SKT dan Piagam</th>
-                                    <th>Berkas MT</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -155,9 +151,9 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $item->nomor_statistik }}</td>
                                         <td class="sticky-column">{{ $item->nama_majelis }}</td>
-                                        <td>{{ $item->alamat }}</td>
-                                        <td>{{ $item->kelurahan->nama_kelurahan }}</td>
-                                        <td>{{ ucfirst($item->kecamatan->kecamatan) }}</td>
+                                        <td>
+                                            {{ $item->alamat }}, {{ $item->kelurahan->jenis_kelurahan == 'Kelurahan' ? 'Kel.' : 'Desa' }} {{ $item->kelurahan->nama_kelurahan }}, Kec. {{ ucwords($item->kecamatan->kecamatan) }}
+                                        </td>
                                         <td class="text-center">
                                             @if($item->mendaftar_ulang && \Carbon\Carbon::today()->gte(\Carbon\Carbon::parse($item->mendaftar_ulang)))
                                                 <span class="badge bg-warning">Belum Update</span>
@@ -175,15 +171,11 @@
                                         <td>{{ $item->mendaftar_ulang }}</td>
                                         <td class="text-wrap">
                                             <div class="btn-group btn-group-sm mb-2" role="group">
-                                                {{-- <button type="button" class="btn btn-success d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#wilayahModal{{ $item->id }}">
-                                                    <i data-feather="file-text" class="me-1" style="width: 24px; height: 24px;"></i> Cetak SKT
-                                                </button> --}}
-                                                <button type="button" 
-                                                        class="btn btn-success d-inline-flex align-items-center" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#wilayahModal{{ $item->id }}">
+                                                <a href="{{ route('skt_piagam_mt.cetak_skt', $item->id) }}" 
+                                                   class="btn btn-success d-inline-flex align-items-center" 
+                                                   target="_blank">
                                                     <i class="fa-regular fa-file-lines me-1"></i> Cetak SKT
-                                                </button>
+                                                </a>
 
                                                 <a href="{{ route('skt_piagam_mt.cetak_piagam', $item->id) }}" class="btn btn-warning d-inline-flex align-items-center" target="_blank">
                                                     <i class="fa-regular fa-file-lines me-1"></i> Cetak Piagam
@@ -191,6 +183,9 @@
                                             </div>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
+                                                <a href="{{ route('skt_piagam_mt.show', $item->id) }}" class="btn btn-info d-inline-flex align-items-center">
+                                                    <i class="fa-regular fa-eye me-1"></i> Lihat
+                                                </a>
                                                 <a href="{{ route('skt_piagam_mt.edit', $item->id) }}" class="btn btn-success d-inline-flex align-items-center">
                                                     <i class="fa-regular fa-pen-to-square me-1"></i> Edit
                                                 </a>
@@ -204,66 +199,7 @@
                                         </td>
 
                                         {{-- Kolom SKT dan Piagam --}}
-                                        <td class="text-wrap">
-                                            <div class="btn-group btn-group-sm mb-2 text-nowrap">
-                                                @if(!$item->file_skt)
-                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
-                                                    <button type="button" class="btn btn-primary d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadSktModal{{ $item->id }}">
-                                                        <i class="fa-solid fa-arrow-up-from-bracket me-1"></i> Upload SKT
-                                                    </button>
-                                                    @endif
-                                                @else
-                                                    <a href="{{ asset('storage/skt/' . $item->file_skt) }}" class="btn btn-success d-inline-flex align-items-center" target="_blank">
-                                                        <i class="fa-regular fa-eye me-1"></i> Lihat SKT
-                                                    </a>
-                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Operator'))
-                                                    <button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDeleteSkt({{ $item->id }})">
-                                                        <i class="fa-regular fa-trash-can me-1"></i> Hapus SKT
-                                                    </button>
-                                                    @endif
-                                                @endif
-                                            </div>
-                                            <div class="btn-group btn-group-sm text-nowrap">
-                                                @if(!$item->file_piagam)
-                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
-                                                    <button type="button" class="btn btn-info d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadPiagamModal{{ $item->id }}">
-                                                        <i class="fa-solid fa-arrow-up-from-bracket me-1"></i> Upload Piagam
-                                                    </button>
-                                                    @endif
-                                                @else
-                                                    <a href="{{ asset('storage/piagam/' . $item->file_piagam) }}" class="btn btn-success d-inline-flex align-items-center" target="_blank">
-                                                        <i class="fa-regular fa-eye me-1"></i> Lihat Piagam
-                                                    </a>
-                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Operator'))
-                                                    <button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDeletePiagam({{ $item->id }})">
-                                                        <i class="fa-regular fa-trash-can me-1"></i> Hapus Piagam
-                                                    </button>
-                                                    @endif
-                                                @endif
-                                            </div>
-                                        </td>
 
-                                        {{-- Kolom Berkas --}}
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                @if(!$item->file_berkas)
-                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
-                                                    <button type="button" class="btn btn-info d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadBerkasModal{{ $item->id }}">
-                                                        <i class="fa-solid fa-arrow-up-from-bracket me-1"></i> Upload Berkas
-                                                    </button>
-                                                    @endif
-                                                @else
-                                                    <a href="{{ asset('storage/berkas/' . $item->file_berkas) }}" class="btn btn-success d-inline-flex align-items-center" target="_blank">
-                                                        <i class="fa-regular fa-eye me-1"></i> Lihat Berkas
-                                                    </a>
-                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator'))
-                                                    <button type="button" class="btn btn-danger d-inline-flex align-items-center" onclick="confirmDeleteBerkas({{ $item->id }})">
-                                                        <i class="fa-regular fa-trash-can me-1"></i> Hapus Berkas
-                                                    </button>
-                                                    @endif
-                                                @endif
-                                            </div>
-                                        </td>
                                     </tr>
 
                                     {{-- Modal Upload SKT --}}
@@ -343,34 +279,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="modal fade" id="wilayahModal{{ $item->id }}" tabindex="-1" data-bs-backdrop="static" aria-labelledby="wilayahModalLabel{{ $item->id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                            <form action="/skt-piagam-mt/{{ $item->id }}/cetak-skt" method="GET" target="_blank">
-                                                <div class="modal-header">
-                                                <h5 class="modal-title" id="wilayahModalLabel{{ $item->id }}">Pilih Tipe Wilayah</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
 
-                                                <div class="modal-body">
-                                                <div class="form-check mb-3">
-                                                    <input class="form-check-input" type="radio" name="tipe" id="tipeKelurahan{{ $item->id }}" value="kelurahan" checked>
-                                                    <label class="form-check-label" for="tipeKelurahan{{ $item->id }}">Kelurahan</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="tipe" id="tipeDesa{{ $item->id }}" value="desa">
-                                                    <label class="form-check-label" for="tipeDesa{{ $item->id }}">Desa</label>
-                                                </div>
-                                                </div>
-
-                                                <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Selesai</button>
-                                                <button type="submit" class="btn btn-primary">Cetak SKT</button>
-                                                </div>
-                                            </form>
-                                            </div>
-                                        </div>
-                                    </div>
 
                                 @empty
                                     <tr>

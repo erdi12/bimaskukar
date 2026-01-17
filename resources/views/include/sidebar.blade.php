@@ -7,11 +7,6 @@
     </div>
     <div class="sidebar-menu">
         <ul class="menu">
-            
-                
-            
-            
-            
             <li class="sidebar-item @yield('dashboard') ">
                 
                 <a href="{{ route('dashboard') }}" class='sidebar-link'>

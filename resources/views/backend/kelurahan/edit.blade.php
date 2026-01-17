@@ -45,6 +45,18 @@
                             @enderror
                         </div>
 
+                        <div class="mb-3">
+                            <label for="jenis_kelurahan" class="form-label">Jenis Kelurahan <span class="text-danger">*</span></label>
+                            <select class="form-select @error('jenis_kelurahan') is-invalid @enderror" 
+                                    id="jenis_kelurahan" name="jenis_kelurahan" required>
+                                <option value="Desa" {{ old('jenis_kelurahan', $kelurahan->jenis_kelurahan) == 'Desa' ? 'selected' : '' }}>Desa</option>
+                                <option value="Kelurahan" {{ old('jenis_kelurahan', $kelurahan->jenis_kelurahan) == 'Kelurahan' ? 'selected' : '' }}>Kelurahan</option>
+                            </select>
+                            @error('jenis_kelurahan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="mb-3 d-flex gap-2">
                             <button type="submit" class="btn btn-success">
                                 <i data-feather="save"></i> Perbarui

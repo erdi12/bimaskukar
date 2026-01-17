@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
+use Illuminate\Pagination\Paginator;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -19,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Paginator::useBootstrapFive();
+        
+        // Share notification data with header
+        \Illuminate\Support\Facades\View::composer('include.headerv2', \App\Http\View\Composers\NotificationComposer::class);
     }
 }
