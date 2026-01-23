@@ -319,6 +319,16 @@ class MarbotController extends Controller
 
             return redirect()->route('marbot.index');
 
+        } elseif ($request->action == 'reject') {
+            $request->validate(['catatan' => 'required']);
+            $marbot->status = 'ditolak';
+            $marbot->catatan = $request->catatan;
+            $marbot->save();
+
+            Alert::success('Berhasil', 'Permohonan telah ditolak.');
+
+            return redirect()->route('marbot.index');
+
         } elseif ($request->action == 'edit_data') {
             // Admin Edit Data
             $request->validate([

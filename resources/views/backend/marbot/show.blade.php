@@ -507,6 +507,26 @@
                             <small>Disetujui pada: {{ $marbot->updated_at->format('d M Y') }}</small>
                         </div>
                     </div>
+                @elseif($marbot->status == 'ditolak')
+                    <!-- Rejected Widget -->
+                    <div class="card bg-dark text-white shadow-lg border-0 mb-4 rounded-3 overflow-hidden">
+                        <div class="card-body text-center p-5 position-relative">
+                            <div class="position-absolute top-0 start-0 w-100 h-100"
+                                style="background: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1;">
+                            </div>
+                            <i class="fas fa-times-circle fa-4x mb-3 text-white-50"></i>
+                            <h4 class="fw-bold">PERMOHONAN DITOLAK</h4>
+                            <p class="mb-4 text-white-50">Permohonan tidak dapat diproses lebih lanjut.</p>
+
+                            @if ($marbot->catatan)
+                                <div class="bg-white text-dark rounded-3 p-3 shadow-sm mb-2">
+                                    <small class="text-uppercase fw-bold text-muted d-block">Alasan Penolakan</small>
+                                    <p class="mb-0 mt-2 text-start">{{ $marbot->catatan }}</p>
+                                </div>
+                            @endif
+                            <small>Ditolak pada: {{ $marbot->updated_at->format('d M Y') }}</small>
+                        </div>
+                    </div>
                 @else
                     <!-- Verification Widget -->
                     <div class="card shadow-sm border-0 mb-4 rounded-3 border-top border-5 border-warning">
@@ -523,6 +543,9 @@
                                     @elseif($marbot->status == 'perbaikan')
                                         <span class="badge bg-danger px-3 py-2 rounded-pill"><i
                                                 class="fas fa-exclamation-circle me-1"></i> MENUNGGU PERBAIKAN USER</span>
+                                    @elseif($marbot->status == 'ditolak')
+                                        <span class="badge bg-dark px-3 py-2 rounded-pill"><i class="fas fa-ban me-1"></i>
+                                            DITOLAK</span>
                                     @endif
                                 </div>
                             </div>
@@ -577,6 +600,25 @@
                                 </div>
                                 <button type="button" class="btn btn-outline-danger w-100 fw-bold btn-return-confirm">
                                     <i class="fas fa-undo-alt me-2"></i> Kembalikan untuk Perbaikan
+                                </button>
+                            </form>
+
+                            <hr class="text-muted my-4">
+
+                            <h6 class="fw-bold text-dark mb-3"><i class="fas fa-ban me-2"></i>Tolak Permohonan</h6>
+                            <form id="form-reject" action="{{ route('marbot.update', $marbot->uuid) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="action" value="reject">
+
+                                <div class="form-group mb-3">
+                                    <label class="form-label small text-muted fw-bold">Alasan Penolakan</label>
+                                    <textarea name="catatan" id="catatan-reject" class="form-control bg-light" rows="4"
+                                        placeholder="Jelaskan alasan penolakan permohonan ini..."></textarea>
+                                    <small class="text-muted">Permohonan yang ditolak tidak dapat diproses kembali.</small>
+                                </div>
+                                <button type="button" class="btn btn-danger w-100 fw-bold btn-reject-confirm">
+                                    <i class="fas fa-times-circle me-2"></i> Tolak Permohonan
                                 </button>
                             </form>
                         </div>
@@ -873,6 +915,34 @@
                     var url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
 
                     window.open(url, '_blank');
+                });
+
+                // SweetAlert for Reject
+                $('.btn-reject-confirm').click(function(e) {
+                    var catatan = $('#catatan-reject').val();
+                    if (!catatan.trim()) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Alasan Penolakan Diperlukan!',
+                            text: 'Harap isi alasan penolakan permohonan.',
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Tolak Permohonan?',
+                        html: "Permohonan akan ditolak secara <strong>permanen</strong>.<br>Pemohon tidak dapat mengajukan perbaikan.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, Tolak!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $('#form-reject').submit();
+                        }
+                    });
                 });
 
                 // SweetAlert for Session Messages

@@ -16,7 +16,20 @@ Route::get('/profil', [\App\Http\Controllers\FrontendController::class, 'profil'
 Route::get('/layanan/{slug}', [\App\Http\Controllers\FrontendController::class, 'detailLayanan'])->name('layanan.detail');
 Route::get('/kontak', [\App\Http\Controllers\FrontendController::class, 'kontak'])->name('kontak');
 Route::get('/data-keagamaan', [\App\Http\Controllers\FrontendController::class, 'dataKeagamaan'])->name('data_keagamaan');
-Route::get('/cek-validitas', [\App\Http\Controllers\ValiditasController::class, 'index'])->name('cek_validitas');
+
+// Cek Validitas - Form pencarian
+Route::get('/cek-validitas', [\App\Http\Controllers\ValiditasController::class, 'index'])
+    ->name('cek_validitas');
+
+// Cek Validitas - Search (POST untuk keamanan lebih baik)
+Route::post('/cek-validitas/search', [\App\Http\Controllers\ValiditasController::class, 'search'])
+    ->name('cek_validitas.search')
+    ->middleware('throttle:10,1'); // 10 requests per menit untuk mencegah brute force
+
+// Cek Validitas - Detail dengan UUID (lebih aman)
+Route::get('/cek-validitas/{type}/{uuid}', [\App\Http\Controllers\ValiditasController::class, 'show'])
+    ->name('cek_validitas.show')
+    ->middleware('throttle:20,1'); // 20 requests per menit (lebih longgar karena sudah punya UUID)
 
 // Marbot Registration
 Route::get('/registrasi-marbot', [\App\Http\Controllers\MarbotFrontendController::class, 'create'])->name('marbot.register');
@@ -186,38 +199,37 @@ Route::middleware(['auth'])->group(function () {
 
     // API Public (inside Auth)
 
-
     // Notifications
     Route::get('/notifications/data', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::get('/notifications/{id}/go', [\App\Http\Controllers\NotificationController::class, 'readAndRedirect'])->name('notifications.go');
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.mark_all_read');
-    
+
     // DEV Only: Sync Notifications (Remove in production)
-    Route::get('/dev/sync-notifications', function() {
+    Route::get('/dev/sync-notifications', function () {
         // Clear existing (optional, careful!)
         // \Illuminate\Support\Facades\DB::table('notifications')->delete();
 
         // 1. Sync Marbot Diajukan
         $marbots = \App\Models\Marbot::where('status', 'diajukan')->get();
         $users = \App\Models\User::all(); // Notify ALL users for now (or filter by role)
-        
+
         $count = 0;
-        foreach($marbots as $m) {
-            foreach($users as $u) {
+        foreach ($marbots as $m) {
+            foreach ($users as $u) {
                 // Check if not already notified
                 $exists = $u->notifications()
                     ->where('type', 'App\Notifications\NewMarbotNotification')
                     ->whereJsonContains('data->uuid', $m->uuid)
                     ->exists();
 
-                if(!$exists) {
+                if (! $exists) {
                     $u->notify(new \App\Notifications\NewMarbotNotification($m));
                     $count++;
                 }
             }
         }
-        
+
         return "Synced $count Marbot notifications.";
     });
 

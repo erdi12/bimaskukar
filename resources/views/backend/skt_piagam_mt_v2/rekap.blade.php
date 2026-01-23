@@ -23,6 +23,38 @@
             <p class="text-muted">Statistik dan visualisasi data majelis taklim se-Kabupaten</p>
         </div>
 
+        <!-- Filter Data -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card card-modern">
+                    <div class="card-body">
+                        <form action="{{ route('skt_piagam_mt_v2.rekap') }}" method="GET" class="row g-3 align-items-end">
+                            <div class="col-12 col-md-4">
+                                <label for="start_date" class="form-label fw-bold">Tanggal Mulai</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date"
+                                    value="{{ request('start_date') }}">
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="end_date" class="form-label fw-bold">Tanggal Akhir</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date"
+                                    value="{{ request('end_date') }}">
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary flex-grow-1">
+                                        <i class="fas fa-filter me-1"></i> Filter
+                                    </button>
+                                    <a href="{{ route('skt_piagam_mt_v2.rekap') }}" class="btn btn-secondary flex-grow-1">
+                                        <i class="fas fa-undo me-1"></i> Reset
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Statistik Cards -->
         <div class="row mb-4">
             <div class="col-12 col-md-3 mb-4">

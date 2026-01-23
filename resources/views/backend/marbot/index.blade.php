@@ -233,6 +233,11 @@
                                                 class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-2">
                                                 Perbaikan
                                             </span>
+                                        @elseif($marbot->status == 'ditolak')
+                                            <span
+                                                class="badge bg-dark bg-opacity-10 text-dark border border-dark-subtle rounded-pill px-3 py-2">
+                                                Ditolak
+                                            </span>
                                         @endif
                                     </td>
                                     <td class="text-center">

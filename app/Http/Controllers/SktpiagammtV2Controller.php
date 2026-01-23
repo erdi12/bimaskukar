@@ -85,6 +85,12 @@ class SktpiagammtV2Controller extends Controller
             if (request()->has('kelurahan_id') && request('kelurahan_id')) {
                 $query->where('kelurahan_id', request('kelurahan_id'));
             }
+            if (request()->has('start_date') && request('start_date')) {
+                $query->whereDate('mendaftar', '>=', request('start_date'));
+            }
+            if (request()->has('end_date') && request('end_date')) {
+                $query->whereDate('mendaftar', '<=', request('end_date'));
+            }
 
             return \Yajra\DataTables\Facades\DataTables::of($query)
                 ->addIndexColumn()
@@ -334,10 +340,21 @@ class SktpiagammtV2Controller extends Controller
     /**
      * Display rekap page (V2 version).
      */
-    public function rekap()
+    public function rekap(Request $request)
     {
         $kecamatans = \App\Models\Kecamatan::all();
-        $sktpiagammts = \App\Models\Sktpiagammt::with(['kecamatan', 'kelurahan'])->get();
+        
+        $query = \App\Models\Sktpiagammt::with(['kecamatan', 'kelurahan']);
+
+        // Filter Rentang Tanggal
+        if ($request->has('start_date') && $request->start_date) {
+            $query->whereDate('mendaftar', '>=', $request->start_date);
+        }
+        if ($request->has('end_date') && $request->end_date) {
+            $query->whereDate('mendaftar', '<=', $request->end_date);
+        }
+
+        $sktpiagammts = $query->get();
 
         // Hitung total keseluruhan
         $totalAktif = $sktpiagammts->where('status', 'aktif')->count();

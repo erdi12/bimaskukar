@@ -20,21 +20,30 @@
 
                     <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5">
                         <div class="card-body p-4 p-md-5">
-                            <form action="{{ route('cek_validitas') }}" method="GET">
+                            @if (session('error'))
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <strong>{{ session('error') }}</strong>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            @endif
+
+                            <form action="{{ route('cek_validitas.search') }}" method="POST">
+                                @csrf
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <label for="type" class="form-label fw-semibold">Jenis Lembaga</label>
                                         <select class="form-select border-2" id="type" name="type" required>
-                                            <option value="" disabled {{ request('type') ? '' : 'selected' }}>Pilih
+                                            <option value="" disabled {{ old('type') ? '' : 'selected' }}>Pilih
                                                 Jenis...</option>
                                             <option value="majelis_taklim"
-                                                {{ request('type') == 'majelis_taklim' ? 'selected' : '' }}>Majelis Taklim
+                                                {{ old('type') == 'majelis_taklim' ? 'selected' : '' }}>Majelis Taklim
                                             </option>
-                                            <option value="masjid" {{ request('type') == 'masjid' ? 'selected' : '' }}>
+                                            <option value="masjid" {{ old('type') == 'masjid' ? 'selected' : '' }}>
                                                 Masjid</option>
-                                            <option value="mushalla" {{ request('type') == 'mushalla' ? 'selected' : '' }}>
+                                            <option value="mushalla" {{ old('type') == 'mushalla' ? 'selected' : '' }}>
                                                 Mushalla</option>
-                                            <option value="marbot" {{ request('type') == 'marbot' ? 'selected' : '' }}>
+                                            <option value="marbot" {{ old('type') == 'marbot' ? 'selected' : '' }}>
                                                 Marbot Masjid</option>
                                         </select>
                                     </div>
@@ -44,7 +53,7 @@
                                         <div class="input-group">
                                             <input type="text" class="form-control border-2" id="keyword"
                                                 name="keyword" placeholder="Masukkan Nomor Statistik, ID, atau NIK..."
-                                                value="{{ request('keyword') }}" required>
+                                                value="{{ old('keyword') }}" required>
                                             <button class="btn bg-primary-custom text-white fw-bold px-4" type="submit">
                                                 <i class="bi bi-search me-2"></i>Cari
                                             </button>
@@ -57,7 +66,7 @@
                         </div>
                     </div>
 
-                    @if (request()->has('type'))
+                    @if (false) {{-- Hapus bagian hasil lama karena sekarang redirect ke halaman detail --}}
                         @if ($result)
                             <div class="card border-0 shadow rounded-4 border-start border-5 border-success position-relative overflow-hidden fade-in-up"
                                 style="cursor: default !important;">
@@ -153,6 +162,19 @@
                                                             class="btn btn-sm btn-warning fw-bold w-100">
                                                             <i class="bi bi-pencil-square me-1"></i> Perbaiki Data
                                                         </a>
+                                                    </div>
+                                                @elseif ($result->status == 'ditolak')
+                                                    <span class="badge bg-dark rounded-pill px-3 py-2"><i
+                                                            class="bi bi-x-circle me-1"></i> Ditolak</span>
+                                                    <div class="alert alert-danger mt-2 small">
+                                                        <strong>Alasan Penolakan:</strong><br>
+                                                        {{ $result->catatan ?? 'Permohonan Anda tidak dapat diproses lebih lanjut.' }}
+                                                    </div>
+                                                    <div
+                                                        class="alert alert-info mt-2 small border-0 bg-info bg-opacity-10 text-info-emphasis">
+                                                        <i class="bi bi-info-circle me-1"></i>
+                                                        Permohonan yang ditolak tidak dapat diperbaiki. Silakan hubungi
+                                                        admin untuk informasi lebih lanjut.
                                                     </div>
                                                 @else
                                                     <span class="badge bg-warning text-dark rounded-pill px-3 py-2"><i

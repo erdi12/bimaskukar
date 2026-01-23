@@ -81,7 +81,7 @@ class MarbotUmrohExport extends DefaultValueBinder implements FromQuery, ShouldA
             $marbot->no_hp,
             $marbot->alamat,
             $marbot->kecamatan ? $marbot->kecamatan->kecamatan : '-',
-            $marbot->kelurahan ? $marbot->kelurahan->kelurahan : '-',
+            $marbot->kelurahan ? $marbot->kelurahan->nama_kelurahan : '-',
             $namaRumahIbadah,
             $marbot->bulan_umroh ? $bulanNama.' '.$marbot->tahun_umroh : '-',
             $marbot->nomor_induk_marbot,

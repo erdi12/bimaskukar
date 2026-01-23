@@ -90,6 +90,18 @@
                                         <h6 class="fw-bold mb-3"><i class="fas fa-filter me-1"></i> Filter Data</h6>
                                         <form action="{{ route('skt_piagam_mt_v2.index') }}" method="GET">
                                             <div class="row g-2">
+                                                {{-- Filter Tanggal --}}
+                                                <div class="col-12 col-md-6">
+                                                    <input type="text" class="form-control datepicker" id="start_date"
+                                                        name="start_date" placeholder="Tanggal Awal"
+                                                        value="{{ request('start_date') }}">
+                                                </div>
+                                                <div class="col-12 col-md-6">
+                                                    <input type="text" class="form-control datepicker" id="end_date"
+                                                        name="end_date" placeholder="Tanggal Akhir"
+                                                        value="{{ request('end_date') }}">
+                                                </div>
+
                                                 {{-- Filter Kecamatan --}}
                                                 <div class="col-12 col-md-6">
                                                     <select class="form-select w-100" id="kecamatan_filter"
@@ -236,6 +248,8 @@
                         data: function(d) {
                             d.kecamatan_id = $('#kecamatan_filter').val();
                             d.kelurahan_id = $('#kelurahan_filter').val();
+                            d.start_date = $('#start_date').val();
+                            d.end_date = $('#end_date').val();
                         }
                     },
                     columns: [{
@@ -325,7 +339,8 @@
                 });
 
                 // Reload table when filter changes
-                $('#kecamatan_filter, #kelurahan_filter').change(function() {
+                // Reload table when filter changes
+                $('#kecamatan_filter, #kelurahan_filter, #start_date, #end_date').change(function() {
                     table.ajax.reload();
                 });
             });
