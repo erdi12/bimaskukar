@@ -602,10 +602,23 @@
                                     <i class="fas fa-undo-alt me-2"></i> Kembalikan untuk Perbaikan
                                 </button>
                             </form>
+                        </div>
+                    </div>
 
-                            <hr class="text-muted my-4">
+                    <!-- Reject Card - Separated -->
+                    <div class="card shadow-sm border-0 mb-4 rounded-3 border-top border-5 border-danger">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="card-title fw-bold mb-0 text-danger">
+                                <i class="fas fa-ban me-2"></i>Tolak Permohonan
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="alert alert-danger border-0 bg-danger bg-opacity-10 mb-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <small class="fw-bold">Perhatian:</small> Permohonan yang ditolak bersifat permanen dan
+                                tidak dapat diproses kembali.
+                            </div>
 
-                            <h6 class="fw-bold text-dark mb-3"><i class="fas fa-ban me-2"></i>Tolak Permohonan</h6>
                             <form id="form-reject" action="{{ route('marbot.update', $marbot->uuid) }}" method="POST">
                                 @csrf
                                 @method('PUT')
@@ -614,8 +627,16 @@
                                 <div class="form-group mb-3">
                                     <label class="form-label small text-muted fw-bold">Alasan Penolakan</label>
                                     <textarea name="catatan" id="catatan-reject" class="form-control bg-light" rows="4"
-                                        placeholder="Jelaskan alasan penolakan permohonan ini..."></textarea>
-                                    <small class="text-muted">Permohonan yang ditolak tidak dapat diproses kembali.</small>
+                                        placeholder="Jelaskan alasan penolakan permohonan ini..." required></textarea>
+
+                                    @if ($marbot->no_hp)
+                                        <div class="mt-2 text-end">
+                                            <button type="button" class="btn btn-sm btn-dark rounded-pill px-3"
+                                                id="btn-wa-reject">
+                                                <i class="fab fa-whatsapp me-1"></i> Kirim Notifikasi ke WA
+                                            </button>
+                                        </div>
+                                    @endif
                                 </div>
                                 <button type="button" class="btn btn-danger w-100 fw-bold btn-reject-confirm">
                                     <i class="fas fa-times-circle me-2"></i> Tolak Permohonan
@@ -911,6 +932,44 @@
                         "Silahkan klik Jenis Lembaga lalu pilih Marbot Masjid, Masukkan NIK Anda, klik Cari, lalu tekan tombol 'Perbaiki Data'." +
                         "*" + "\n\n" +
                         "Terima kasih.";
+
+                    var url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
+
+                    window.open(url, '_blank');
+                });
+
+                // WhatsApp Draft untuk Penolakan
+                $('#btn-wa-reject').click(function() {
+                    var phone = $('#marbot-phone').val();
+                    var name = $('#marbot-name').val();
+                    var catatan = $('#catatan-reject').val();
+
+                    if (!catatan.trim()) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Alasan Penolakan Kosong',
+                            text: 'Tulis alasan penolakan terlebih dahulu sebelum mengirim WA.',
+                        });
+                        return;
+                    }
+
+                    // Format Phone (08 -> 628)
+                    phone = phone.replace(/[^0-9]/g, '');
+                    if (phone.startsWith('0')) {
+                        phone = '62' + phone.substring(1);
+                    }
+
+                    var message = "Assalamu'alaikum Wr. Wb.\n\n" +
+                        "Yth. Bapak/Ibu *" + name + "*\n" +
+                        "NIK: {{ $marbot->nik }}\n\n" +
+                        "Dengan hormat, kami sampaikan bahwa permohonan pendaftaran Marbot Masjid Anda telah kami proses.\n\n" +
+                        "📋 *STATUS: DITOLAK*\n\n" +
+                        "📝 *Alasan Penolakan: " +
+                        catatan + "*\n\n" +
+                        //"Untuk informasi lebih lanjut, silakan hubungi Kantor Kementerian Agama Kabupaten Kutai Kartanegara.\n\n" +
+                        "Terima kasih atas perhatian Bapak/Ibu.\n\n" +
+                        "Wassalamu'alaikum Wr. Wb."; //+
+                    // "_Pesan otomatis dari Sistem Bimas Islam Kukar_";
 
                     var url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
 

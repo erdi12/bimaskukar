@@ -114,7 +114,7 @@ class MarbotController extends Controller
 
         $marbots = $query->get();
         $kecamatans = \App\Models\Kecamatan::orderBy('kecamatan')->get();
-        
+
         // Fetch Settings
         $startDate = Setting::where('key', 'marbot_register_start')->value('value');
         $endDate = Setting::where('key', 'marbot_register_end')->value('value');
@@ -324,6 +324,15 @@ class MarbotController extends Controller
             $marbot->status = 'ditolak';
             $marbot->catatan = $request->catatan;
             $marbot->save();
+
+            // Simpan data untuk WhatsApp notification
+            session()->flash('whatsapp_notification', [
+                'phone' => $marbot->no_hp,
+                'name' => $marbot->nama_lengkap,
+                'nik' => $marbot->nik,
+                'reason' => $request->catatan,
+                'type' => 'reject',
+            ]);
 
             Alert::success('Berhasil', 'Permohonan telah ditolak.');
 
