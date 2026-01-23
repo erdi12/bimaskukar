@@ -962,7 +962,7 @@
                     var message = "Assalamu'alaikum Wr. Wb.\n\n" +
                         "Yth. Bapak/Ibu *" + name + "*\n" +
                         "NIK: {{ $marbot->nik }}\n\n" +
-                        "Dengan hormat, kami sampaikan bahwa permohonan pendaftaran Marbot Masjid Anda telah kami proses.\n\n" +
+                        "Dengan hormat, kami sampaikan bahwa permohonan pendaftaran Marbot Anda telah kami proses.\n\n" +
                         "📋 *STATUS: DITOLAK*\n\n" +
                         "📝 *Alasan Penolakan: " +
                         catatan + "*\n\n" +

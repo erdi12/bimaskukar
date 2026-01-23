@@ -102,24 +102,124 @@ class MarbotController extends Controller
 
     public function index(Request $request)
     {
-        $query = Marbot::with(['kecamatan', 'kelurahan', 'insentifs'])->latest();
+        // Handle DataTables AJAX Request
+        if ($request->ajax()) {
+            $query = Marbot::with(['kecamatan', 'kelurahan', 'masjid', 'mushalla', 'insentifs'])
+                ->orderBy('created_at', 'desc');
 
-        // Filters
-        if ($request->has('kecamatan_id') && $request->kecamatan_id != '') {
-            $query->where('kecamatan_id', $request->kecamatan_id);
-        }
-        if ($request->has('kelurahan_id') && $request->kelurahan_id != '') {
-            $query->where('kelurahan_id', $request->kelurahan_id);
+            // Apply filters from main filter form
+            if ($request->has('kecamatan_id') && $request->kecamatan_id != '') {
+                $query->where('kecamatan_id', $request->kecamatan_id);
+            }
+            if ($request->has('kelurahan_id') && $request->kelurahan_id != '') {
+                $query->where('kelurahan_id', $request->kelurahan_id);
+            }
+
+            return datatables()->of($query)
+                ->addIndexColumn()
+                ->addColumn('checkbox', function ($marbot) {
+                    return '<div class="form-check d-flex justify-content-center">
+                                <input type="checkbox" value="'.$marbot->uuid.'" 
+                                    class="form-check-input marbot-checkbox shadow-sm" 
+                                    style="cursor: pointer; width: 18px; height: 18px;">
+                            </div>';
+                })
+                ->addColumn('identitas', function ($marbot) {
+                    $initial = substr($marbot->nama_lengkap, 0, 1);
+                    $nim = $marbot->nomor_induk_marbot
+                        ? '<span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill" style="font-size: 0.65rem;">NIM: '.$marbot->nomor_induk_marbot.'</span>'
+                        : '';
+
+                    return '<div class="d-flex align-items-center">
+                                <div class="avatar-initials bg-soft-primary text-primary me-3 rounded-circle fw-bold d-flex align-items-center justify-content-center" 
+                                    style="width: 40px; height: 40px; background-color: rgba(13, 110, 253, 0.1);">
+                                    '.$initial.'
+                                </div>
+                                <div>
+                                    <span class="d-block fw-bold text-dark">'.$marbot->nama_lengkap.'</span>
+                                    '.$nim.'
+                                </div>
+                            </div>';
+                })
+                ->addColumn('nik_kontak', function ($marbot) {
+                    return '<div class="d-flex flex-column">
+                                <span class="font-monospace text-dark fw-medium lh-sm" style="font-size: 0.9rem;">'.$marbot->nik.'</span>
+                                <span class="text-muted small mt-1"><i class="fas fa-phone-alt me-1" style="font-size: 0.75rem;"></i> '.($marbot->no_hp ?? '-').'</span>
+                            </div>';
+                })
+                ->addColumn('rumah_ibadah', function ($marbot) {
+                    $nama = '-';
+                    if ($marbot->rumah_ibadah) {
+                        $nama = $marbot->tipe_rumah_ibadah == 'Masjid'
+                            ? $marbot->rumah_ibadah->nama_masjid
+                            : $marbot->rumah_ibadah->nama_mushalla;
+                    }
+
+                    return '<div class="d-flex flex-column">
+                                <span class="fw-bold text-dark text-truncate" style="max-width: 200px;">'.$nama.'</span>
+                                <span class="badge bg-light text-secondary border rounded-pill mt-1" style="width: fit-content; font-size: 0.7rem;">
+                                    '.$marbot->tipe_rumah_ibadah.'
+                                </span>
+                            </div>';
+                })
+                ->addColumn('wilayah', function ($marbot) {
+                    return '<span class="d-inline-block text-secondary small fw-medium px-2 py-1 rounded bg-light border border-light-subtle">
+                                '.ucwords(strtolower($marbot->kecamatan->kecamatan ?? '-')).'
+                            </span>';
+                })
+                ->addColumn('status', function ($marbot) {
+                    $badges = [
+                        'diajukan' => '<span class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle rounded-pill px-3 py-2">Diajukan</span>',
+                        'disetujui' => '<span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-2">Disetujui</span>',
+                        'perbaikan' => '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-2">Perbaikan</span>',
+                        'ditolak' => '<span class="badge bg-dark bg-opacity-10 text-dark border border-dark-subtle rounded-pill px-3 py-2">Ditolak</span>',
+                    ];
+
+                    return $badges[$marbot->status] ?? '';
+                })
+                ->addColumn('insentif', function ($marbot) {
+                    $hasIncentive = $marbot->insentifs->where('tahun_anggaran', date('Y'))->isNotEmpty();
+
+                    if ($hasIncentive) {
+                        return '<span class="btn btn-sm btn-icon btn-soft-success rounded-circle cursor-default" title="Sudah Menerima" 
+                                    style="background-color: rgba(25, 135, 84, 0.1); color: #198754; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-check"></i>
+                                </span>';
+                    } else {
+                        return '<span class="btn btn-sm btn-icon btn-light text-muted rounded-circle cursor-default border" title="Belum Menerima" 
+                                    style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-times"></i>
+                                </span>';
+                    }
+                })
+                ->addColumn('action', function ($marbot) {
+                    return '<div class="d-flex justify-content-center gap-1">
+                                <a href="'.route('marbot.show', $marbot->uuid).'" 
+                                    class="btn btn-sm btn-info text-white shadow-sm" data-bs-toggle="tooltip" title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger shadow-sm btn-delete" 
+                                    data-id="'.$marbot->uuid.'" data-bs-toggle="tooltip" title="Hapus Data">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <form id="delete-form-'.$marbot->uuid.'" 
+                                    action="'.route('marbot.destroy', $marbot->uuid).'" method="POST" class="d-none">
+                                    '.csrf_field().method_field('DELETE').'
+                                </form>
+                            </div>';
+                })
+                ->rawColumns(['checkbox', 'identitas', 'nik_kontak', 'rumah_ibadah', 'wilayah', 'status', 'insentif', 'action'])
+                ->make(true);
         }
 
-        $marbots = $query->get();
+        // Regular page load
         $kecamatans = \App\Models\Kecamatan::orderBy('kecamatan')->get();
 
         // Fetch Settings
         $startDate = Setting::where('key', 'marbot_register_start')->value('value');
         $endDate = Setting::where('key', 'marbot_register_end')->value('value');
 
-        return view('backend.marbot.index', compact('marbots', 'startDate', 'endDate', 'kecamatans'));
+        return view('backend.marbot.index', compact('startDate', 'endDate', 'kecamatans'));
     }
 
     public function updateSettings(Request $request)

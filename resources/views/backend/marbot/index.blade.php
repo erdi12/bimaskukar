@@ -155,129 +155,7 @@
                             </tr>
                         </thead>
                         <tbody class="border-top-0">
-                            @foreach ($marbots as $marbot)
-                                @php
-                                    $hasIncentive = $marbot->insentifs
-                                        ->where('tahun_anggaran', date('Y'))
-                                        ->isNotEmpty();
-                                @endphp
-                                <tr class="border-bottom hover-bg-light">
-                                    <td class="text-center">
-                                        <div class="form-check d-flex justify-content-center">
-                                            <input type="checkbox" value="{{ $marbot->uuid }}"
-                                                class="form-check-input marbot-checkbox shadow-sm"
-                                                style="cursor: pointer; width: 18px; height: 18px;">
-                                        </div>
-                                    </td>
-                                    <td class="text-center fw-medium text-muted">{{ $loop->iteration }}</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-initials bg-soft-primary text-primary me-3 rounded-circle fw-bold d-flex align-items-center justify-content-center"
-                                                style="width: 40px; height: 40px; background-color: rgba(13, 110, 253, 0.1);">
-                                                {{ substr($marbot->nama_lengkap, 0, 1) }}
-                                            </div>
-                                            <div>
-                                                <span class="d-block fw-bold text-dark">{{ $marbot->nama_lengkap }}</span>
-                                                @if ($marbot->nomor_induk_marbot)
-                                                    <span
-                                                        class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill"
-                                                        style="font-size: 0.65rem;">
-                                                        NIM: {{ $marbot->nomor_induk_marbot }}
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span class="font-monospace text-dark fw-medium lh-sm"
-                                                style="font-size: 0.9rem;">{{ $marbot->nik }}</span>
-                                            <span class="text-muted small mt-1"><i class="fas fa-phone-alt me-1"
-                                                    style="font-size: 0.75rem;"></i> {{ $marbot->no_hp ?? '-' }}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span class="fw-bold text-dark text-truncate" style="max-width: 200px;">
-                                                @if ($marbot->rumah_ibadah)
-                                                    {{ $marbot->tipe_rumah_ibadah == 'Masjid' ? $marbot->rumah_ibadah->nama_masjid : $marbot->rumah_ibadah->nama_mushalla }}
-                                                @else
-                                                    <span class="text-muted fst-italic">-</span>
-                                                @endif
-                                            </span>
-                                            <span class="badge bg-light text-secondary border rounded-pill mt-1"
-                                                style="width: fit-content; font-size: 0.7rem;">
-                                                {{ $marbot->tipe_rumah_ibadah }}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span
-                                            class="d-inline-block text-secondary small fw-medium px-2 py-1 rounded bg-light border border-light-subtle">
-                                            {{ ucwords(strtolower($marbot->kecamatan->kecamatan ?? '-')) }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        @if ($marbot->status == 'diajukan')
-                                            <span
-                                                class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle rounded-pill px-3 py-2">
-                                                Diajukan
-                                            </span>
-                                        @elseif($marbot->status == 'disetujui')
-                                            <span
-                                                class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-2">
-                                                Disetujui
-                                            </span>
-                                        @elseif($marbot->status == 'perbaikan')
-                                            <span
-                                                class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-2">
-                                                Perbaikan
-                                            </span>
-                                        @elseif($marbot->status == 'ditolak')
-                                            <span
-                                                class="badge bg-dark bg-opacity-10 text-dark border border-dark-subtle rounded-pill px-3 py-2">
-                                                Ditolak
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        @if ($hasIncentive)
-                                            <span
-                                                class="btn btn-sm btn-icon btn-soft-success rounded-circle cursor-default"
-                                                title="Sudah Menerima"
-                                                style="background-color: rgba(25, 135, 84, 0.1); color: #198754; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
-                                                <i class="fas fa-check"></i>
-                                            </span>
-                                        @else
-                                            <span
-                                                class="btn btn-sm btn-icon btn-light text-muted rounded-circle cursor-default border"
-                                                title="Belum Menerima"
-                                                style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
-                                                <i class="fas fa-times"></i>
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-1">
-                                            <a href="{{ route('marbot.show', $marbot->uuid) }}"
-                                                class="btn btn-sm btn-info text-white shadow-sm" data-bs-toggle="tooltip"
-                                                title="Lihat Detail">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-danger shadow-sm btn-delete"
-                                                data-id="{{ $marbot->uuid }}" data-bs-toggle="tooltip"
-                                                title="Hapus Data">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </div>
-                                        <form id="delete-form-{{ $marbot->uuid }}"
-                                            action="{{ route('marbot.destroy', $marbot->uuid) }}" method="POST"
-                                            class="d-none">
-                                            @csrf @method('DELETE')
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
+                            <!-- Data will be loaded via AJAX -->
                         </tbody>
                     </table>
                 </div>
@@ -289,17 +167,82 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             $(function() {
+                // Get filter values from URL
+                var kecamatanId = '{{ request('kecamatan_id') }}';
+                var kelurahanId = '{{ request('kelurahan_id') }}';
+
                 var table = $("#table-marbot").DataTable({
+                    "processing": true,
+                    "serverSide": true,
+                    "ajax": {
+                        "url": "{{ route('marbot.index') }}",
+                        "data": function(d) {
+                            d.kecamatan_id = kecamatanId;
+                            d.kelurahan_id = kelurahanId;
+                        }
+                    },
+                    "columns": [{
+                            "data": "checkbox",
+                            "name": "checkbox",
+                            "orderable": false,
+                            "searchable": false
+                        },
+                        {
+                            "data": "DT_RowIndex",
+                            "name": "DT_RowIndex",
+                            "orderable": false,
+                            "searchable": false
+                        },
+                        {
+                            "data": "identitas",
+                            "name": "nama_lengkap"
+                        },
+                        {
+                            "data": "nik_kontak",
+                            "name": "nik"
+                        },
+                        {
+                            "data": "rumah_ibadah",
+                            "name": "rumah_ibadah",
+                            "orderable": false
+                        },
+                        {
+                            "data": "wilayah",
+                            "name": "kecamatan.kecamatan"
+                        },
+                        {
+                            "data": "status",
+                            "name": "status"
+                        },
+                        {
+                            "data": "insentif",
+                            "name": "insentif",
+                            "orderable": false,
+                            "searchable": false
+                        },
+                        {
+                            "data": "action",
+                            "name": "action",
+                            "orderable": false,
+                            "searchable": false
+                        }
+                    ],
                     "responsive": true,
                     "lengthChange": true,
                     "autoWidth": false,
+                    "pageLength": 25,
+                    "lengthMenu": [
+                        [10, 25, 50, 100],
+                        [10, 25, 50, 100]
+                    ],
                     "language": {
-                        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
+                        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json",
+                        "processing": '<div class="d-flex justify-content-center align-items-center" style="min-height: 200px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>'
                     },
-                    "columnDefs": [{
-                        "orderable": false,
-                        "targets": [0, 8]
-                    }]
+                    "drawCallback": function(settings) {
+                        // Re-initialize tooltips after table draw
+                        $('[data-bs-toggle="tooltip"]').tooltip();
+                    }
                 });
 
                 // Select All Checkbox
@@ -594,3 +537,35 @@
         </div>
     </div>
 @endsection
+
+@push('styles')
+    <style>
+        /* Hide default DataTables processing indicator */
+        .dataTables_processing {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: auto !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 20px !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Custom spinner styling */
+        .dataTables_processing .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3em;
+        }
+
+        /* Smooth fade in/out for processing */
+        .dataTables_wrapper .dataTables_processing {
+            opacity: 0.9;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+@endpush
