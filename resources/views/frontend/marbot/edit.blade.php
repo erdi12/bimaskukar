@@ -77,8 +77,8 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('marbot.frontend.update', $marbot->uuid) }}" method="POST"
-                            enctype="multipart/form-data">
+                        <form id="form-perbaikan" action="{{ route('marbot.frontend.update', $marbot->uuid) }}"
+                            method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -312,9 +312,9 @@
                                                 id="id_rumah_ibadah_input" placeholder="Masukkan ID atau Nomor Statistik"
                                                 value="{{ $marbot->rumah_ibadah_id }}" required>
                                             <!-- Note: Value here is ID PK, not Statistic Number, but user expects Stat Number usually.
-                                                                                                     However, in edit mode we might wanna show Stat Number if possible.
-                                                                                                     But let's stick to simple clear logic for now or leave empty to force re-search?
-                                                                                                     Actually re-searching is safer if invalid. -->
+                                                                                                             However, in edit mode we might wanna show Stat Number if possible.
+                                                                                                             But let's stick to simple clear logic for now or leave empty to force re-search?
+                                                                                                             Actually re-searching is safer if invalid. -->
                                             <button class="btn btn-outline-danger" type="button" id="btn-check-rm">Cek
                                                 Data</button>
                                         </div>
@@ -415,7 +415,7 @@
                                                 <i class="fas fa-check-circle me-1"></i> Berkas Valid
                                             </div>
                                             <!-- Hidden input to ensure validation passes on server if required, IF the server requires re-upload.
-                                                                                                 But controller uses nullable for file updates. So no input needed if not changing. -->
+                                                                                                         But controller uses nullable for file updates. So no input needed if not changing. -->
                                         @else
                                             <input class="form-control border-danger" type="file"
                                                 id="{{ $field }}" name="{{ $field }}"
@@ -431,8 +431,9 @@
                             </div>
 
                             <div class="d-grid gap-2 mt-5">
-                                <button type="submit" class="btn btn-warning btn-lg fw-bold"><i
-                                        class="fas fa-paper-plane me-2"></i> Kirim Perbaikan Data</button>
+                                <button type="button" id="btn-submit-perbaikan"
+                                    class="btn btn-warning btn-lg fw-bold"><i class="fas fa-paper-plane me-2"></i> Kirim
+                                    Perbaikan Data</button>
                             </div>
                         </form>
                     </div>
@@ -441,9 +442,41 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
+            // SweetAlert Confirmation for Submit
+            $('#btn-submit-perbaikan').click(function() {
+                Swal.fire({
+                    title: 'Kirim Perbaikan Data?',
+                    html: '<p class="mb-2">Pastikan semua data yang Anda isi sudah benar.</p><p class="small text-muted">Data yang sudah dikirim akan diverifikasi oleh admin.</p>',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ffc107',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-paper-plane me-2"></i>Ya, Kirim!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Mengirim Data...',
+                            html: 'Mohon tunggu sebentar',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Submit form
+                        $('#form-perbaikan').submit();
+                    }
+                });
+            });
+
             // Load existing Kelurahan logic
             var existingKecId = '{{ old('kecamatan_id', $marbot->kecamatan_id) }}';
             var existingKelId = '{{ old('kelurahan_id', $marbot->kelurahan_id) }}';
