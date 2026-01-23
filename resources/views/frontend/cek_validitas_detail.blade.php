@@ -298,4 +298,29 @@
             }
         </style>
     @endpush
+
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    html: '{{ session('success') }}',
+                    confirmButtonColor: '#2A9D8F',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    html: '{{ session('error') }}',
+                    confirmButtonColor: '#2A9D8F',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+        </script>
+    @endpush
 @endsection

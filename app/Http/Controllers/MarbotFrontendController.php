@@ -260,6 +260,9 @@ class MarbotFrontendController extends Controller
 
         $marbot->update($data);
 
-        return redirect()->route('cek_validitas', ['type' => 'marbot', 'keyword' => $marbot->nik])->with('success', 'Data permohonan berhasil diperbaiki dan diajukan kembali.');
+        return redirect()->route('cek_validitas.show', [
+            'type' => 'marbot', 
+            'uuid' => $marbot->uuid
+        ])->with('success', 'Data permohonan berhasil diperbaiki dan diajukan kembali untuk diverifikasi.');
     }
 }
