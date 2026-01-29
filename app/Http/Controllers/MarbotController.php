@@ -199,7 +199,9 @@ class MarbotController extends Controller
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <button type="button" class="btn btn-sm btn-danger shadow-sm btn-delete" 
-                                    data-id="'.$marbot->uuid.'" data-bs-toggle="tooltip" title="Hapus Data">
+                                    data-id="'.$marbot->uuid.'" 
+                                    data-name="'.$marbot->nama_lengkap.'" 
+                                    data-bs-toggle="tooltip" title="Hapus Data">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                                 <form id="delete-form-'.$marbot->uuid.'" 
@@ -405,9 +407,13 @@ class MarbotController extends Controller
             return redirect()->route('marbot.index');
 
         } elseif ($request->action == 'return') {
-            $request->validate(['catatan' => 'required']);
+            $request->validate([
+                'catatan' => 'required',
+                'deadline_perbaikan' => 'required|date|after:today',
+            ]);
             $marbot->status = 'perbaikan';
             $marbot->catatan = $request->catatan;
+            $marbot->deadline_perbaikan = $request->deadline_perbaikan;
 
             if ($request->verification_details) {
                 $marbot->verification_details = json_decode($request->verification_details, true);

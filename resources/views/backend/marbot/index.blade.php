@@ -282,13 +282,16 @@
                 // SweetAlert for Delete
                 $(document).on('click', '.btn-delete', function() {
                     let id = $(this).data('id');
+                    let name = $(this).data('name');
                     Swal.fire({
-                        title: 'Hapus Data?',
-                        text: "Data akan dihapus permanen.",
+                        title: 'Hapus Data Marbot?',
+                        html: `<p class="mb-2">Anda akan menghapus data:</p>
+                               <p class="fw-bold text-danger mb-2">${name}</p>
+                               <p class="text-muted small">Data akan dihapus permanen dan tidak dapat dikembalikan.</p>`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#d33',
-                        confirmButtonText: 'Ya Hapus',
+                        confirmButtonText: 'Ya, Hapus!',
                         cancelButtonText: 'Batal'
                     }).then((result) => {
                         if (result.isConfirmed) {

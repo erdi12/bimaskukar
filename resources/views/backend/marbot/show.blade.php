@@ -598,6 +598,16 @@
                                         </div>
                                     @endif
                                 </div>
+
+                                <div class="form-group mb-3">
+                                    <label class="form-label small text-muted fw-bold">Batas Waktu Perbaikan</label>
+                                    <input type="date" name="deadline_perbaikan" class="form-control" required
+                                        min="{{ date('Y-m-d') }}">
+                                    <div class="form-text text-muted small">Jika melewati tanggal ini, status otomatis
+                                        menjadi
+                                        <strong>Ditolak</strong>.
+                                    </div>
+                                </div>
                                 <button type="button" class="btn btn-outline-danger w-100 fw-bold btn-return-confirm">
                                     <i class="fas fa-undo-alt me-2"></i> Kembalikan untuk Perbaikan
                                 </button>

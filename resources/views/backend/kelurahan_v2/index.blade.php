@@ -120,8 +120,8 @@
                         <div class="mb-3">
                             <label for="nama_kelurahan" class="form-label">Nama Kelurahan/Desa <span
                                     class="text-danger">*</span></label>
-                            <input type="text" class="form-control text-capitalize" id="nama_kelurahan"
-                                name="nama_kelurahan" required placeholder="Contoh: Panji">
+                            <input type="text" class="form-control" id="nama_kelurahan" name="nama_kelurahan" required
+                                placeholder="Contoh: Panji">
                         </div>
 
                         <div class="mb-3">

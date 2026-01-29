@@ -40,6 +40,7 @@ class Marbot extends Model
         'status_umroh',
         'tahun_umroh',
         'bulan_umroh',
+        'deadline_perbaikan',
     ];
 
     protected static function boot()
@@ -62,6 +63,7 @@ class Marbot extends Model
         'verification_details' => 'array',
         'tanggal_lahir' => 'date',
         'tanggal_mulai_bekerja' => 'date',
+        'deadline_perbaikan' => 'date',
     ];
 
     public function getActivitylogOptions(): LogOptions

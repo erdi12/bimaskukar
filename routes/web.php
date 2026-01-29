@@ -155,6 +155,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('appv2/skt-masjid/export', [\App\Http\Controllers\SktMasjidController::class, 'export'])->name('skt_masjid.export');
         Route::get('appv2/skt-masjid/template', [\App\Http\Controllers\SktMasjidController::class, 'downloadTemplate'])->name('skt_masjid.template');
         Route::get('appv2/skt-masjid/{id}/cetak-skt', [\App\Http\Controllers\SktMasjidController::class, 'cetakSkt'])->name('skt_masjid.cetak_skt');
+        Route::get('appv2/skt-masjid/{id}/cetak-rekomendasi', [\App\Http\Controllers\SktMasjidController::class, 'cetakRekomendasi'])->name('skt_masjid.cetak_rekomendasi');
         Route::get('appv2/skt-masjid', [\App\Http\Controllers\SktMasjidController::class, 'index'])->name('skt_masjid.index');
         Route::get('appv2/skt-masjid/{skt_masjid}', [\App\Http\Controllers\SktMasjidController::class, 'show'])->name('skt_masjid.show');
 

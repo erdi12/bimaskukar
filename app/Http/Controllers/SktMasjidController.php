@@ -49,6 +49,7 @@ class SktMasjidController extends Controller
 
         return $fileName;
     }
+
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -74,7 +75,15 @@ class SktMasjidController extends Controller
                     $btn = '<div class="btn-group">';
 
                     $btn .= '<a href="'.route('skt_masjid.show', $row->uuid).'" class="btn btn-sm btn-outline-info" title="Detail"><i class="fas fa-eye"></i></a>';
-                    $btn .= '<a href="'.route('skt_masjid.cetak_skt', $row->uuid).'" class="btn btn-sm btn-outline-success" target="_blank" title="Cetak SKT"><i class="fas fa-print"></i></a>';
+                    $btn .= '<div class="btn-group">';
+                    $btn .= '<button type="button" class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Cetak">';
+                    $btn .= '<i class="fas fa-print"></i>';
+                    $btn .= '</button>';
+                    $btn .= '<div class="dropdown-menu">';
+                    $btn .= '<a class="dropdown-item" href="'.route('skt_masjid.cetak_skt', $row->uuid).'" target="_blank">Cetak SKT</a>';
+                    $btn .= '<a class="dropdown-item" href="'.route('skt_masjid.cetak_rekomendasi', $row->uuid).'" target="_blank">Cetak Rekomendasi Bantuan</a>';
+                    $btn .= '</div>';
+                    $btn .= '</div>';
 
                     if (auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator')) {
                         $btn .= '<button onclick="editData(\''.$row->uuid.'\')" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fas fa-edit"></i></button>';
@@ -275,6 +284,85 @@ class SktMasjidController extends Controller
         }
     }
 
+    public function cetakRekomendasi($id)
+    {
+        try {
+            $sktMasjid = SktMasjid::with(['kecamatan', 'kelurahan', 'tipologiMasjid'])->where('uuid', $id)->firstOrFail();
+
+            // Catat aktivitas cetak Rekomendasi Masjid
+            activity()
+                ->performedOn($sktMasjid)
+                ->causedBy(auth()->user())
+                ->event('cetak_rekomendasi_masjid')
+                ->log('Mencetak Rekomendasi Masjid');
+
+            $logoPath = public_path('images/kemenag/kemenag.png');
+            $logoBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath));
+
+            // Setup additional image
+            $additionalImageBase64 = null;
+            $barcodePath = null;
+
+            if ($sktMasjid->file_barcode_masjid) {
+                $barcodePath = storage_path('app/public/masjid_barcodes/'.$sktMasjid->file_barcode_masjid);
+            }
+
+            if ($barcodePath && file_exists($barcodePath)) {
+                $additionalImageBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($barcodePath));
+            } else {
+                // Fallback to logo if no barcode or file missing
+                $additionalImagePath = public_path('images/kemenag/kemenag.png');
+                if (file_exists($additionalImagePath)) {
+                    $additionalImageBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($additionalImagePath));
+                }
+            }
+
+            // Setup variables for the view
+            $data = [
+                'sktMasjid' => $sktMasjid,
+                'logoBase64' => $logoBase64,
+                'additionalImageBase64' => $additionalImageBase64,
+                'nomor_naskah' => $sktMasjid->nomor_id_masjid, // Bisa disesuaikan kalau format nomornya beda
+                'tanggal_naskah' => \Carbon\Carbon::now()->isoFormat('D MMMM Y'),
+                'nama_pengirim' => 'Ariyadi F, S.Ag.',
+                'nip_pengirim' => '19770805 199803 1 003',
+                'jabatan_pengirim' => 'Kepala Kantor Kementerian Agama Kabupaten Kutai Kartanegara',
+                'ttd_pengirim' => 'Ariyadi F, S.Ag.',
+            ];
+
+            // Generate PDF menggunakan DomPDF
+            $pdf = Pdf::loadView('backend.skt_masjid.cetak_rekomendasi', $data)
+                ->setPaper('A4')
+                ->setOption('margin-top', 10)
+                ->setOption('margin-right', 10)
+                ->setOption('margin-bottom', 10)
+                ->setOption('margin-left', 10)
+                ->setOption('isHtml5ParserEnabled', true)
+                ->setOption('chroot', public_path());
+
+            // Register custom font ke DomPDF if exists
+            $fontPath = public_path('fonts/imprint-mt-shadow.ttf');
+            if (file_exists($fontPath)) {
+                $pdf->getDomPDF()->getOptions()->set('fontDir', public_path('fonts'));
+                $pdf->getDomPDF()->getOptions()->set('fontCache', storage_path('logs'));
+            }
+
+            // Buat nama file
+            $fileName = $sktMasjid->nomor_id_masjid.' - '.$sktMasjid->nama_masjid.' - Rekomendasi.pdf';
+            $fileName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $fileName);
+
+            return $pdf->stream($fileName);
+
+        } catch (\Exception $e) {
+            \Log::error('PDF Generation Error: '.$e->getMessage());
+
+            return response()->view('errors.custom', [
+                'message' => 'Gagal membuat PDF: '.$e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ], 500);
+        }
+    }
+
     public function uploadSkt(Request $request)
     {
         $request->validate([
@@ -299,7 +387,7 @@ class SktMasjidController extends Controller
 
             return redirect()->back()->with('error', 'Tidak ada file yang diupload.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal upload file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal upload file: '.$e->getMessage());
         }
     }
 
@@ -309,21 +397,20 @@ class SktMasjidController extends Controller
             $sktMasjid = SktMasjid::where('uuid', $id)->firstOrFail();
 
             if ($sktMasjid->file_skt) {
-                $filePath = storage_path('app/public/masjid_skt/' . $sktMasjid->file_skt);
+                $filePath = storage_path('app/public/masjid_skt/'.$sktMasjid->file_skt);
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
                 $sktMasjid->update(['file_skt' => null]);
+
                 return redirect()->back()->with('success', 'File SKT berhasil dihapus!');
             }
 
             return redirect()->back()->with('error', 'File tidak ditemukan.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus file: '.$e->getMessage());
         }
     }
-
-
 
     public function rekap()
     {

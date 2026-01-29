@@ -90,7 +90,10 @@ class KelurahanV2Controller extends Controller
             'jenis_kelurahan.required' => 'Jenis Kelurahan harus dipilih',
         ]);
 
-        Kelurahan::create($request->only('kecamatan_id', 'nama_kelurahan', 'jenis_kelurahan'));
+        $data = $request->only('kecamatan_id', 'nama_kelurahan', 'jenis_kelurahan');
+        $data['nama_kelurahan'] = \Illuminate\Support\Str::title($data['nama_kelurahan']);
+
+        Kelurahan::create($data);
 
         return response()->json(['success' => 'Data Kelurahan berhasil ditambahkan']);
     }
@@ -126,7 +129,10 @@ class KelurahanV2Controller extends Controller
             'jenis_kelurahan.required' => 'Jenis Kelurahan harus dipilih',
         ]);
 
-        $kelurahan->update($request->only('kecamatan_id', 'nama_kelurahan', 'jenis_kelurahan'));
+        $data = $request->only('kecamatan_id', 'nama_kelurahan', 'jenis_kelurahan');
+        $data['nama_kelurahan'] = \Illuminate\Support\Str::title($data['nama_kelurahan']);
+
+        $kelurahan->update($data);
 
         return response()->json(['success' => 'Data Kelurahan berhasil diperbarui']);
     }
