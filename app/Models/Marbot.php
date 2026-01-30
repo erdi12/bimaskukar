@@ -106,9 +106,10 @@ class Marbot extends Model
     {
         $bulan = '';
         if ($this->bulan_umroh) {
-            $bulan = \Carbon\Carbon::create(null, (int) $this->bulan_umroh, 1)->locale('id')->monthName . ' ';
+            $bulan = \Carbon\Carbon::create(null, (int) $this->bulan_umroh, 1)->locale('id')->monthName.' ';
         }
-        return $bulan . $this->tahun_umroh;
+
+        return $bulan.$this->tahun_umroh;
     }
 
     public function insentifs()

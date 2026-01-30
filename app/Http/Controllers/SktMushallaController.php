@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SktMushallaExport;
+use App\Exports\SktMushallaTemplate;
+use App\Imports\SktMushallaImport;
 use App\Models\Kecamatan;
 use App\Models\SktMushalla;
 use App\Models\TipologiMushalla;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Yajra\DataTables\Facades\DataTables;
-
-use App\Exports\SktMushallaExport;
-use App\Exports\SktMushallaTemplate;
-use App\Imports\SktMushallaImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Yajra\DataTables\Facades\DataTables;
 
 class SktMushallaController extends Controller
 {
@@ -51,6 +50,7 @@ class SktMushallaController extends Controller
 
         return $fileName;
     }
+
     public function rekap()
     {
         $kecamatans = Kecamatan::orderBy('kecamatan')->get();
@@ -65,8 +65,8 @@ class SktMushallaController extends Controller
         }
 
         $rekap = $rekap->groupBy('kecamatans.id', 'kecamatans.kecamatan')
-                       ->orderBy('kecamatans.kecamatan')
-                       ->get();
+            ->orderBy('kecamatans.kecamatan')
+            ->get();
 
         return view('backend.skt_mushalla.rekap', compact('rekap', 'tipologis'));
     }
@@ -81,24 +81,27 @@ class SktMushallaController extends Controller
         return Excel::download(new SktMushallaTemplate, 'template-data-mushalla.xlsx');
     }
 
-    public function import(Request $request) 
+    public function import(Request $request)
     {
         $request->validate([
-            'file_excel' => 'required|mimes:xls,xlsx'
+            'file_excel' => 'required|mimes:xls,xlsx',
         ]);
-        
+
         try {
             Excel::import(new SktMushallaImport, $request->file('file_excel'));
+
             return redirect()->back()->with('success', 'Data Mushalla berhasil diimport!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal import data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal import data: '.$e->getMessage());
         }
     }
+
     public function index(Request $request)
     {
         if ($request->ajax()) {
             $data = SktMushalla::with(['kecamatan', 'kelurahan', 'tipologiMushalla'])
-                ->select('skt_mushallas.*');
+                ->select('skt_mushallas.*')
+                ->latest();
 
             if ($request->has('kecamatan_id') && $request->kecamatan_id != '') {
                 $data->where('kecamatan_id', $request->kecamatan_id);
@@ -187,6 +190,7 @@ class SktMushallaController extends Controller
     public function show($id)
     {
         $sktMushalla = SktMushalla::with(['kecamatan', 'kelurahan', 'tipologiMushalla'])->where('uuid', $id)->firstOrFail();
+
         return view('backend.skt_mushalla.show', compact('sktMushalla'));
     }
 
@@ -241,7 +245,7 @@ class SktMushallaController extends Controller
     {
         try {
             $sktMushalla = SktMushalla::with(['kecamatan', 'kelurahan', 'tipologiMushalla'])->where('uuid', $id)->firstOrFail();
-            
+
             // Catat aktivitas cetak SKT Mushalla
             activity()
                 ->performedOn($sktMushalla)
@@ -340,7 +344,7 @@ class SktMushallaController extends Controller
 
             return redirect()->back()->with('error', 'Tidak ada file yang diupload.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal upload file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal upload file: '.$e->getMessage());
         }
     }
 
@@ -350,19 +354,18 @@ class SktMushallaController extends Controller
             $sktMushalla = SktMushalla::where('uuid', $id)->firstOrFail();
 
             if ($sktMushalla->file_skt) {
-                $filePath = storage_path('app/public/mushalla_skt/' . $sktMushalla->file_skt);
+                $filePath = storage_path('app/public/mushalla_skt/'.$sktMushalla->file_skt);
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
                 $sktMushalla->update(['file_skt' => null]);
+
                 return redirect()->back()->with('success', 'File SKT berhasil dihapus!');
             }
 
             return redirect()->back()->with('error', 'File tidak ditemukan.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus file: '.$e->getMessage());
         }
     }
-
-
 }

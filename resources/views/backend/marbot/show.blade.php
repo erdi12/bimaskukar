@@ -543,6 +543,18 @@
                                     @elseif($marbot->status == 'perbaikan')
                                         <span class="badge bg-danger px-3 py-2 rounded-pill"><i
                                                 class="fas fa-exclamation-circle me-1"></i> MENUNGGU PERBAIKAN USER</span>
+                                        @if ($marbot->deadline_perbaikan)
+                                            <div
+                                                class="mt-2 small text-danger fw-bold border border-danger rounded p-2 bg-danger bg-opacity-10">
+                                                <i class="fas fa-clock me-1"></i> Batas Waktu:
+                                                {{ $marbot->deadline_perbaikan->translatedFormat('d F Y') }}
+                                                @if ($marbot->deadline_perbaikan->endOfDay()->isPast())
+                                                    (Terlewat)
+                                                @else
+                                                    ({{ $marbot->deadline_perbaikan->endOfDay()->diffForHumans() }})
+                                                @endif
+                                            </div>
+                                        @endif
                                     @elseif($marbot->status == 'ditolak')
                                         <span class="badge bg-dark px-3 py-2 rounded-pill"><i class="fas fa-ban me-1"></i>
                                             DITOLAK</span>
@@ -601,8 +613,12 @@
 
                                 <div class="form-group mb-3">
                                     <label class="form-label small text-muted fw-bold">Batas Waktu Perbaikan</label>
-                                    <input type="date" name="deadline_perbaikan" class="form-control" required
+                                    <input type="date" name="deadline_perbaikan"
+                                        class="form-control @error('deadline_perbaikan') is-invalid @enderror" required
                                         min="{{ date('Y-m-d') }}">
+                                    @error('deadline_perbaikan')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                     <div class="form-text text-muted small">Jika melewati tanggal ini, status otomatis
                                         menjadi
                                         <strong>Ditolak</strong>.

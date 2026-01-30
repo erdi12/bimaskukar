@@ -52,6 +52,14 @@
                     </a>
 
                     <!-- Group 3: Settings & Create -->
+                    <form action="{{ route('marbot.check_deadline') }}" method="POST" class="d-inline"
+                        onsubmit="return confirm('Jalankan pengecekan batas waktu perbaikan sekarang? Data yang melewati batas waktu akan otomatis ditolak.')">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger shadow-sm" data-bs-toggle="tooltip"
+                            title="Cek & Tolak Expired">
+                            <i class="fas fa-user-clock"></i>
+                        </button>
+                    </form>
                     <button type="button" class="btn btn-warning shadow-sm" data-bs-toggle="modal"
                         data-bs-target="#settingsModal" title="Atur Jadwal">
                         <i class="fas fa-cog"></i>

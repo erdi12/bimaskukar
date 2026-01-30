@@ -209,6 +209,11 @@ class MarbotFrontendController extends Controller
             return redirect()->route('cek_validitas')->with('error', 'Hanya data dengan status perbaikan yang dapat diedit.');
         }
 
+        // Check Deadline
+        if ($marbot->deadline_perbaikan && $marbot->deadline_perbaikan->endOfDay()->isPast()) {
+            return redirect()->route('cek_validitas')->with('error', 'Batas waktu perbaikan telah habis. Permohonan Anda otomatis ditolak.');
+        }
+
         $kecamatans = Kecamatan::all();
 
         return view('frontend.marbot.edit', compact('marbot', 'kecamatans'));

@@ -246,6 +246,28 @@ class MarbotController extends Controller
         return redirect()->back();
     }
 
+    public function checkDeadline()
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('marbot:check-deadline');
+            $output = \Illuminate\Support\Facades\Artisan::output();
+            
+            // Keep output short for alert
+            $msg = 'Pengecekan deadline selesai dijalankan.';
+            if (str_contains($output, 'Total rejected:')) {
+                // simple parsing
+                $msg .= ' ' . trim(explode("\n", trim($output))[0] ?? '') . ' ' . trim(explode("\n", trim($output))[1] ?? '');
+            }
+
+            Alert::success('Berhasil', $msg);
+            
+        } catch (\Exception $e) {
+            Alert::error('Gagal', 'Terjadi kesalahan saat menjalankan perintah: ' . $e->getMessage());
+        }
+
+        return redirect()->back();
+    }
+
     public function downloadArchive(Request $request)
     {
         // 1. Set Unlimited Time & Memory untuk proses berat
@@ -409,11 +431,13 @@ class MarbotController extends Controller
         } elseif ($request->action == 'return') {
             $request->validate([
                 'catatan' => 'required',
-                'deadline_perbaikan' => 'required|date|after:today',
+                'deadline_perbaikan' => 'required|date|after_or_equal:today',
             ]);
             $marbot->status = 'perbaikan';
             $marbot->catatan = $request->catatan;
-            $marbot->deadline_perbaikan = $request->deadline_perbaikan;
+            // Force Carbon instance or format if needed, but standard assignment should work.
+            // Ensure no mutator is interfering.
+            $marbot->deadline_perbaikan = $request->input('deadline_perbaikan');
 
             if ($request->verification_details) {
                 $marbot->verification_details = json_decode($request->verification_details, true);

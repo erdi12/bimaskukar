@@ -65,6 +65,25 @@
                         <div class="alert alert-danger">
                             <h6 class="fw-bold"><i class="fas fa-exclamation-circle me-1"></i> Catatan Perbaikan:</h6>
                             <p class="mb-0">{{ $marbot->catatan }}</p>
+                            @if ($marbot->deadline_perbaikan)
+                                <hr class="my-2 border-danger opacity-25">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clock fs-5 me-2 text-danger"></i>
+                                    <div>
+                                        <small class="text-uppercase fw-bold opacity-75 d-block"
+                                            style="font-size: 0.7rem;">Batas Waktu Perbaikan</small>
+                                        <span class="fs-6 fw-bold">
+                                            {{ $marbot->deadline_perbaikan->translatedFormat('d F Y') }}
+                                            @if ($marbot->deadline_perbaikan->endOfDay()->isPast())
+                                                (Terlewat)
+                                            @else
+                                                <span
+                                                    class="badge bg-danger ms-1 bg-opacity-75 rounded-pill">{{ $marbot->deadline_perbaikan->endOfDay()->diffForHumans() }}</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
 
                         @if ($errors->any())
@@ -312,9 +331,9 @@
                                                 id="id_rumah_ibadah_input" placeholder="Masukkan ID atau Nomor Statistik"
                                                 value="{{ $marbot->rumah_ibadah_id }}" required>
                                             <!-- Note: Value here is ID PK, not Statistic Number, but user expects Stat Number usually.
-                                                                                                             However, in edit mode we might wanna show Stat Number if possible.
-                                                                                                             But let's stick to simple clear logic for now or leave empty to force re-search?
-                                                                                                             Actually re-searching is safer if invalid. -->
+                                                                                                                 However, in edit mode we might wanna show Stat Number if possible.
+                                                                                                                 But let's stick to simple clear logic for now or leave empty to force re-search?
+                                                                                                                 Actually re-searching is safer if invalid. -->
                                             <button class="btn btn-outline-danger" type="button" id="btn-check-rm">Cek
                                                 Data</button>
                                         </div>
@@ -415,7 +434,7 @@
                                                 <i class="fas fa-check-circle me-1"></i> Berkas Valid
                                             </div>
                                             <!-- Hidden input to ensure validation passes on server if required, IF the server requires re-upload.
-                                                                                                         But controller uses nullable for file updates. So no input needed if not changing. -->
+                                                                                                             But controller uses nullable for file updates. So no input needed if not changing. -->
                                         @else
                                             <input class="form-control border-danger" type="file"
                                                 id="{{ $field }}" name="{{ $field }}"

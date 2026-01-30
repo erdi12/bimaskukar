@@ -86,19 +86,14 @@
                         style="z-index: 10;">
                         <div class="d-flex align-items-center gap-2">
                             <i class="fas fa-info-circle text-info"></i>
-                            <span class="small text-muted">Pilih marbot di bawah untuk mengubah status seleksi masal.</span>
+                            <span class="small text-muted">Pilih marbot di bawah untuk menetapkan status penerima bantuan
+                                umroh.</span>
                         </div>
                         <div class="d-flex gap-2">
-                            <button type="submit" name="action" value="kandidat" class="btn btn-sm btn-info text-white">
-                                <i class="fas fa-user-tag me-1"></i> Tandai Kandidat
-                            </button>
-                            <button type="submit" name="action" value="terverifikasi" class="btn btn-sm btn-success">
-                                <i class="fas fa-check-double me-1"></i> Verifikasi Final
-                            </button>
                             <!-- Changed to type button -->
-                            <button type="button" name="action" value="berangkat" class="btn btn-sm btn-dark"
+                            <button type="button" name="action" value="berangkat" class="btn btn-sm btn-success"
                                 id="btnTriggerBerangkat">
-                                <i class="fas fa-plane-departure me-1"></i> Set Berangkat
+                                <i class="fas fa-plane-departure me-1"></i> Set Penerima Umroh
                             </button>
                             <button type="submit" name="action" value="batal" class="btn btn-sm btn-outline-danger">
                                 <i class="fas fa-times me-1"></i> Reset Status
@@ -166,12 +161,8 @@
                                             </div>
                                         </td>
                                         <td class="text-center">
-                                            @if ($marbot->status_umroh == 'kandidat')
-                                                <span class="badge bg-info">Kandidat</span>
-                                            @elseif($marbot->status_umroh == 'terverifikasi')
-                                                <span class="badge bg-success">Terverifikasi</span>
-                                            @elseif($marbot->status_umroh == 'berangkat')
-                                                <span class="badge bg-dark">Berangkat
+                                            @if ($marbot->status_umroh == 'berangkat')
+                                                <span class="badge bg-success">Berangkat
                                                     {{ $marbot->jadwal_keberangkatan }}</span>
                                             @else
                                                 <span class="badge bg-secondary bg-opacity-25 text-secondary">-</span>
@@ -252,30 +243,33 @@
             let marbotStatus = {}; // Store status for validation
 
             // Initialize DataTable
-            var table = $("#table-seleksi").DataTable({
-                "responsive": true,
-                "lengthChange": true,
-                "autoWidth": false,
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
-                },
-                "columnDefs": [{
-                    "orderable": false,
-                    "targets": [0, 6]
-                }],
-                "drawCallback": function(settings) {
-                    // Update checkboxes on current page based on selectedMarbots
-                    $('.check-item').each(function() {
-                        let id = $(this).val();
-                        if (selectedMarbots.includes(id)) {
-                            $(this).prop('checked', true);
-                        }
-                    });
+            // Initialize DataTable only if there are rows (to avoid colspan issues on empty)
+            @if ($candidates->count() > 0)
+                var table = $("#table-seleksi").DataTable({
+                    "responsive": true,
+                    "lengthChange": true,
+                    "autoWidth": false,
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
+                    },
+                    "columnDefs": [{
+                        "orderable": false,
+                        "targets": [0, 6]
+                    }],
+                    "drawCallback": function(settings) {
+                        // Update checkboxes on current page based on selectedMarbots
+                        $('.check-item').each(function() {
+                            let id = $(this).val();
+                            if (selectedMarbots.includes(id)) {
+                                $(this).prop('checked', true);
+                            }
+                        });
 
-                    // Update "Check All" state
-                    updateCheckAllState();
-                }
-            });
+                        // Update "Check All" state
+                        updateCheckAllState();
+                    }
+                });
+            @endif
 
             // Handle individual checkbox change
             $('#table-seleksi tbody').on('change', '.check-item', function() {
@@ -299,9 +293,15 @@
                 let isChecked = this.checked;
 
                 // Only affect visible rows on current page
-                let rows = table.rows({
-                    'page': 'current'
-                }).nodes();
+                let rows = [];
+                if (typeof table !== 'undefined') {
+                    rows = table.rows({
+                        'page': 'current'
+                    }).nodes();
+                } else {
+                    rows = $('#table-seleksi tbody tr');
+                }
+
                 $('input[type="checkbox"]', rows).each(function() {
                     let id = $(this).val();
                     let status = $(this).data('status');
@@ -338,19 +338,19 @@
                     }
 
                     // Validation using stored status map
-                    let allVerified = true;
-                    selectedMarbots.forEach(id => {
-                        if (marbotStatus[id] !== 'terverifikasi') {
-                            allVerified = false;
-                        }
-                    });
+                    // let allVerified = true;
+                    // selectedMarbots.forEach(id => {
+                    //     if (marbotStatus[id] !== 'terverifikasi') {
+                    //         allVerified = false;
+                    //     }
+                    // });
 
-                    if (!allVerified) {
-                        Swal.fire('Gagal',
-                            'Hanya marbot yang statusnya "Terverifikasi" yang bisa diset "Berangkat". Mohon cek kembali pilihan Anda.',
-                            'error');
-                        return;
-                    }
+                    // if (!allVerified) {
+                    //    Swal.fire('Gagal',
+                    //        'Hanya marbot yang statusnya "Terverifikasi" yang bisa diset "Berangkat". Mohon cek kembali pilihan Anda.',
+                    //        'error');
+                    //    return;
+                    // }
 
                     // Show Modal
                     const modalEl = document.getElementById('modalBerangkat');

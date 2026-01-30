@@ -132,6 +132,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('appv2/marbot/seleksi/proses', [\App\Http\Controllers\MarbotController::class, 'prosesSeleksi'])->name('marbot.seleksi.proses');
         // Insentif
         Route::post('appv2/marbot/insentif', [\App\Http\Controllers\MarbotController::class, 'processInsentif'])->name('marbot.insentif.process');
+        Route::post('appv2/marbot/check_deadline', [\App\Http\Controllers\MarbotController::class, 'checkDeadline'])->name('marbot.check_deadline');
 
         Route::resource('appv2/marbot', \App\Http\Controllers\MarbotController::class)->names('marbot');
     });
