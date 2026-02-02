@@ -70,6 +70,7 @@
                             </div>
                         </div>
 
+
                         @if (session('success'))
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 {{ session('success') }}
@@ -333,6 +334,9 @@
                     success: function(res) {
                         $('#modalData').modal('hide');
                         table.ajax.reload();
+
+
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
@@ -342,7 +346,7 @@
                         });
                     },
                     error: function(xhr) {
-                        var errors = xhr.responseJSON.errors;
+                        var errors = xhr.responseJSON && xhr.responseJSON.errors;
                         var errorMessage = '';
                         if (errors) {
                             $.each(errors, function(key, value) {
@@ -365,6 +369,7 @@
             $('#formData')[0].reset();
             $('#data_id').val('');
             $('#error-alert').addClass('d-none');
+            $('#btn-save').prop('disabled', false).text('Simpan');
 
             // Reset chained dropdowns
             $('#kelurahan_id').empty().append('<option value="">-- Pilih Kecamatan Dulu --</option>').prop('disabled',
