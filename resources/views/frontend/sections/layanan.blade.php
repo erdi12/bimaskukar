@@ -10,10 +10,20 @@
                           <a href="{{ route('layanan.detail', $layanan->slug) }}"
                               class="stretched-link text-decoration-none"></a>
                           <div class="display-5 text-primary-custom mb-3">
-                              @if (Str::startsWith($layanan->ikon, 'fa'))
-                                  <i class="{{ $layanan->ikon }}"></i>
+                              {{-- @if (Str::startsWith($layanan->ikon, 'fa')) --}}
+                              @php
+                                  $ikonClean = trim($layanan->ikon);
+                                  $isLocal = \Illuminate\Support\Facades\Storage::disk('public')->exists($ikonClean);
+                                  $lottieSrc = $isLocal ? asset('storage/' . $ikonClean) : $ikonClean;
+                              @endphp
+                              @if (\Illuminate\Support\Str::endsWith($ikonClean, '.json'))
+                                  <lottie-player src="{{ $lottieSrc }}" background="transparent" speed="1"
+                                      style="width: 150px; height: 150px; margin: 0 auto;" loop
+                                      autoplay></lottie-player>
+                              @elseif (\Illuminate\Support\Str::startsWith($ikonClean, 'fa'))
+                                  <i class="{{ $ikonClean }}"></i>
                               @else
-                                  {{ $layanan->ikon }}
+                                  {{ $ikonClean }}
                               @endif
                           </div>
                           <h5 class="fw-semibold text-secondary-custom">{{ $layanan->judul }}</h5>

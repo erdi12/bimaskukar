@@ -33,10 +33,18 @@
             <div class="row justify-content-center text-center">
                 <div class="col-lg-8">
                     <div class="mb-3">
-                        @if (Str::startsWith($layanan->ikon, 'fa'))
-                            <i class="{{ $layanan->ikon }} display-4 display-md-3"></i>
+                        @php
+                            $ikonClean = trim($layanan->ikon);
+                            $isLocal = \Illuminate\Support\Facades\Storage::disk('public')->exists($ikonClean);
+                            $lottieSrc = $isLocal ? asset('storage/' . $ikonClean) : $ikonClean;
+                        @endphp
+                        @if (\Illuminate\Support\Str::endsWith($ikonClean, '.json'))
+                            <lottie-player src="{{ $lottieSrc }}" background="transparent" speed="1"
+                                style="width: 200px; height: 200px; margin: 0 auto;" loop autoplay></lottie-player>
+                        @elseif (\Illuminate\Support\Str::startsWith($ikonClean, 'fa'))
+                            <i class="{{ $ikonClean }} display-4 display-md-3"></i>
                         @else
-                            <span class="display-4 display-md-3">{{ $layanan->ikon }}</span>
+                            <span class="display-4 display-md-3">{{ $ikonClean }}</span>
                         @endif
                     </div>
                     <h1 class="fw-bold mb-3 fs-2 fs-md-1">{{ $layanan->judul }}</h1>

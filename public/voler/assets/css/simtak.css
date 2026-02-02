@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Ketupat Ramadhan';
-    src: url('../fonts/Ketupat-Ramadhan') format('truetype');
+    src: url('/voler/fonts/Ketupat-Ramadhan.ttf') format('truetype');
 }
 
 :root {

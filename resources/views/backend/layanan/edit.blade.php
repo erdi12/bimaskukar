@@ -12,7 +12,7 @@
 
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <form action="{{ route('layanan.update', $layanan->id) }}" method="POST">
+                <form action="{{ route('layanan.update', $layanan->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="mb-3">
@@ -22,10 +22,23 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Ikon</label>
+                        <label class="form-label fw-bold">Ikon (Upload File Lottie .json)</label>
+                        <input type="file" name="ikon_file" class="form-control" accept=".json">
+                        <div class="form-text">Upload file baru untuk mengganti ikon saat ini.</div>
+                        @if (
+                            $layanan->ikon &&
+                                \Illuminate\Support\Str::endsWith($layanan->ikon, '.json') &&
+                                file_exists(public_path('storage/' . $layanan->ikon)))
+                            <div class="mt-2">
+                                <span class="badge bg-info">File Saat Ini: {{ $layanan->ikon }}</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ikon (FontAwesome Class / Link)</label>
                         <input type="text" name="ikon" class="form-control" value="{{ old('ikon', $layanan->ikon) }}">
-                        <div class="form-text">Gunakan emoji atau nama class FontAwesome. Lihat daftar ikon di <a
-                                href="https://fontawesome.com/v6/search?o=r&m=free" target="_blank">sini</a>.</div>
+                        <div class="form-text">Gunakan ini jika tidak mengupload file JSON lokal.</div>
                     </div>
 
                     <div class="mb-3">

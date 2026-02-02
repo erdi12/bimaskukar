@@ -12,7 +12,7 @@
 
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <form action="{{ route('layanan.store') }}" method="POST">
+                <form action="{{ route('layanan.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="mb-3">
                         <label class="form-label fw-bold">Judul Layanan <span class="text-danger">*</span></label>
@@ -21,11 +21,16 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Ikon</label>
+                        <label class="form-label fw-bold">Ikon (Upload File Lottie .json)</label>
+                        <input type="file" name="ikon_file" class="form-control" accept=".json">
+                        <div class="form-text">Atau gunakan FontAwesome Class di bawah ini jika tidak ada file JSON.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ikon (FontAwesome Class / Link)</label>
                         <input type="text" name="ikon" class="form-control"
-                            placeholder="Contoh: 🕌 atau fa-mosque (FontAwesome)" value="{{ old('ikon') }}">
-                        <div class="form-text">Gunakan emoji atau nama class FontAwesome. Lihat daftar ikon di <a
-                                href="https://fontawesome.com/v6/search?o=r&m=free" target="_blank">sini</a>.</div>
+                            placeholder="Contoh: fa-solid fa-mosque atau URL https://..." value="{{ old('ikon') }}">
+                        <div class="form-text">Jika upload file dipilih, input teks ini akan diabaikan.</div>
                     </div>
 
                     <div class="mb-3">

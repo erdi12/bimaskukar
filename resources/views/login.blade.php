@@ -21,7 +21,9 @@
     <style>
         @font-face {
             font-family: 'Ketupat Ramadhan';
-            src: url('../fonts/Ketupat-Ramadhan') format('truetype');
+            src: url('{{ asset('voler/fonts/Ketupat-Ramadhan.ttf') }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
         }
 
         :root {

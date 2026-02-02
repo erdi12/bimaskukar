@@ -42,10 +42,22 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td class="fw-semibold">{{ $item->judul }}</td>
                                     <td class="fs-4">
-                                        @if (Str::startsWith($item->ikon, 'fa'))
-                                            <i class="{{ $item->ikon }}"></i>
+                                        @php
+                                            $ikonBack = trim($item->ikon);
+                                            $isLocalBack = \Illuminate\Support\Facades\Storage::disk('public')->exists(
+                                                $ikonBack,
+                                            );
+                                            $lottieSrcBack = $isLocalBack ? asset('storage/' . $ikonBack) : $ikonBack;
+                                        @endphp
+                                        @if (\Illuminate\Support\Str::endsWith($ikonBack, '.json'))
+                                            <!-- Lottie Preview in Admin -->
+                                            <lottie-player src="{{ $lottieSrcBack }}" background="transparent"
+                                                speed="1" style="width: 40px; height: 40px;" loop
+                                                autoplay></lottie-player>
+                                        @elseif (\Illuminate\Support\Str::startsWith($ikonBack, 'fa'))
+                                            <i class="{{ $ikonBack }}"></i>
                                         @else
-                                            {{ $item->ikon }}
+                                            {{ $ikonBack }}
                                         @endif
                                     </td>
                                     <td>{{ Str::limit($item->deskripsi_singkat, 60) }}</td>
