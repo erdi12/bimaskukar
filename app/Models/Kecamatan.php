@@ -58,7 +58,7 @@ class Kecamatan extends Model
     // Relasi ke SktPiagamMt
     public function sktpiagammts()
     {
-        return $this->hasMany(SktPiagamMt::class);
+        return $this->hasMany(Sktpiagammt::class);
     }
 
     public function sktrumahibadah()

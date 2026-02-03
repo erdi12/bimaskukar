@@ -79,6 +79,13 @@ class FrontendController extends Controller
         $totalMasjid = \App\Models\SktMasjid::count();
         $totalMushalla = \App\Models\SktMushalla::count();
 
-        return view('frontend.data_keagamaan', compact('data', 'tab', 'search', 'totalMajelis', 'totalMasjid', 'totalMushalla'));
+        // Get Summary per Kecamatan
+        $kecamatanSummary = \App\Models\Kecamatan::withCount([
+            'sktpiagammts as majelis_count',
+            'masjids as masjid_count',
+            'mushallas as mushalla_count'
+        ])->orderBy('kecamatan')->get();
+
+        return view('frontend.data_keagamaan', compact('data', 'tab', 'search', 'totalMajelis', 'totalMasjid', 'totalMushalla', 'kecamatanSummary'));
     }
 }
