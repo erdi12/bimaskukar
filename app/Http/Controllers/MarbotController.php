@@ -251,18 +251,18 @@ class MarbotController extends Controller
         try {
             \Illuminate\Support\Facades\Artisan::call('marbot:check-deadline');
             $output = \Illuminate\Support\Facades\Artisan::output();
-            
+
             // Keep output short for alert
             $msg = 'Pengecekan deadline selesai dijalankan.';
             if (str_contains($output, 'Total rejected:')) {
                 // simple parsing
-                $msg .= ' ' . trim(explode("\n", trim($output))[0] ?? '') . ' ' . trim(explode("\n", trim($output))[1] ?? '');
+                $msg .= ' '.trim(explode("\n", trim($output))[0] ?? '').' '.trim(explode("\n", trim($output))[1] ?? '');
             }
 
             Alert::success('Berhasil', $msg);
-            
+
         } catch (\Exception $e) {
-            Alert::error('Gagal', 'Terjadi kesalahan saat menjalankan perintah: ' . $e->getMessage());
+            Alert::error('Gagal', 'Terjadi kesalahan saat menjalankan perintah: '.$e->getMessage());
         }
 
         return redirect()->back();
@@ -291,6 +291,13 @@ class MarbotController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('kecamatan_id')) {
+            $query->where('kecamatan_id', $request->kecamatan_id);
+            $kecName = \App\Models\Kecamatan::find($request->kecamatan_id)->kecamatan ?? 'Kecamatan';
+        } else {
+            $kecName = 'Semua_Kecamatan';
+        }
+
         $marbots = $query->get();
 
         if ($marbots->isEmpty()) {
@@ -301,7 +308,8 @@ class MarbotController extends Controller
 
         // Setup ZIP
         $statusLabel = $request->status ? '_'.$request->status : '_Semua';
-        $zipFileName = 'Arsip_Marbot'.$statusLabel.'_'.$request->start_date.'_sd_'.$request->end_date.'.zip';
+        $safeKecName = $request->filled('kecamatan_id') ? '_'.\Illuminate\Support\Str::slug($kecName) : '';
+        $zipFileName = 'Arsip_Marbot'.$statusLabel.$safeKecName.'_'.$request->start_date.'_sd_'.$request->end_date.'.zip';
         $zipFilePath = storage_path('app/public/'.$zipFileName);
 
         $zip = new \ZipArchive;
@@ -434,9 +442,10 @@ class MarbotController extends Controller
                 'deadline_perbaikan' => 'required|date|after_or_equal:today',
             ]);
             $marbot->status = 'perbaikan';
+            // Set NIM to null if it exists (force re-issuance after correction logic)
+            $marbot->nomor_induk_marbot = null;
+
             $marbot->catatan = $request->catatan;
-            // Force Carbon instance or format if needed, but standard assignment should work.
-            // Ensure no mutator is interfering.
             $marbot->deadline_perbaikan = $request->input('deadline_perbaikan');
 
             if ($request->verification_details) {
@@ -452,6 +461,8 @@ class MarbotController extends Controller
         } elseif ($request->action == 'reject') {
             $request->validate(['catatan' => 'required']);
             $marbot->status = 'ditolak';
+            // Remove NIM if exists (Revoke status)
+            $marbot->nomor_induk_marbot = null;
             $marbot->catatan = $request->catatan;
             $marbot->save();
 

@@ -499,6 +499,16 @@
                     @csrf
                     <div class="modal-body">
                         <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Status (Opsional)</label>
+                                <select class="form-select" name="status">
+                                    <option value="">Semua Status</option>
+                                    <option value="disetujui">Disetujui</option>
+                                    <option value="dtolak">Ditolak</option>
+                                    <option value="perbaikan">Perbaikan</option>
+                                    <option value="diajukan">Diajukan</option>
+                                </select>
+                            </div>
                             <div class="col-6">
                                 <label class="form-label">Dari</label>
                                 <input type="date" class="form-control" name="start_date" required>
@@ -506,6 +516,17 @@
                             <div class="col-6">
                                 <label class="form-label">Sampai</label>
                                 <input type="date" class="form-control" name="end_date" required>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <label class="form-label">Kecamatan (Opsional)</label>
+                                <select class="form-select" name="kecamatan_id">
+                                    <option value="">Semua Kecamatan</option>
+                                    @foreach ($kecamatans as $kec)
+                                        <option value="{{ $kec->id }}">{{ $kec->kecamatan }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted d-block mt-1">Pilih kecamatan untuk memperkecil ukuran file
+                                    ZIP.</small>
                             </div>
                         </div>
                     </div>

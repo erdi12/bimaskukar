@@ -184,12 +184,12 @@ class MarbotFrontendController extends Controller
         // Send Notification to Admins
         try {
             $users = \App\Models\User::all(); // Or filter by role 'Admin'/'Operator'
-            foreach($users as $user) {
+            foreach ($users as $user) {
                 $user->notify(new \App\Notifications\NewMarbotNotification($marbot));
             }
         } catch (\Exception $e) {
             // Log error but continue
-            \Illuminate\Support\Facades\Log::error("Notification Error: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Notification Error: '.$e->getMessage());
         }
 
         return redirect()->route('marbot.register')->with('success', 'Permohonan Nomor Induk Marbot berhasil diajukan. Silakan tunggu verifikasi.');
@@ -225,6 +225,11 @@ class MarbotFrontendController extends Controller
 
         if ($marbot->status != 'perbaikan') {
             abort(403, 'Aksi tidak diizinkan.');
+        }
+
+        // Enforce Deadline Check
+        if ($marbot->deadline_perbaikan && $marbot->deadline_perbaikan->endOfDay()->isPast()) {
+            return redirect()->route('cek_validitas')->with('error', 'Batas waktu perbaikan telah habis. Permohonan Anda otomatis ditolak.');
         }
 
         $request->validate([
@@ -266,8 +271,8 @@ class MarbotFrontendController extends Controller
         $marbot->update($data);
 
         return redirect()->route('cek_validitas.show', [
-            'type' => 'marbot', 
-            'uuid' => $marbot->uuid
+            'type' => 'marbot',
+            'uuid' => $marbot->uuid,
         ])->with('success', 'Data permohonan berhasil diperbaiki dan diajukan kembali untuk diverifikasi.');
     }
 }

@@ -331,9 +331,9 @@
                                                 id="id_rumah_ibadah_input" placeholder="Masukkan ID atau Nomor Statistik"
                                                 value="{{ $marbot->rumah_ibadah_id }}" required>
                                             <!-- Note: Value here is ID PK, not Statistic Number, but user expects Stat Number usually.
-                                                                                                                 However, in edit mode we might wanna show Stat Number if possible.
-                                                                                                                 But let's stick to simple clear logic for now or leave empty to force re-search?
-                                                                                                                 Actually re-searching is safer if invalid. -->
+                                                                                                                     However, in edit mode we might wanna show Stat Number if possible.
+                                                                                                                     But let's stick to simple clear logic for now or leave empty to force re-search?
+                                                                                                                     Actually re-searching is safer if invalid. -->
                                             <button class="btn btn-outline-danger" type="button" id="btn-check-rm">Cek
                                                 Data</button>
                                         </div>
@@ -434,7 +434,7 @@
                                                 <i class="fas fa-check-circle me-1"></i> Berkas Valid
                                             </div>
                                             <!-- Hidden input to ensure validation passes on server if required, IF the server requires re-upload.
-                                                                                                             But controller uses nullable for file updates. So no input needed if not changing. -->
+                                                                                                                 But controller uses nullable for file updates. So no input needed if not changing. -->
                                         @else
                                             <input class="form-control border-danger" type="file"
                                                 id="{{ $field }}" name="{{ $field }}"
@@ -450,9 +450,16 @@
                             </div>
 
                             <div class="d-grid gap-2 mt-5">
-                                <button type="button" id="btn-submit-perbaikan"
-                                    class="btn btn-warning btn-lg fw-bold"><i class="fas fa-paper-plane me-2"></i> Kirim
-                                    Perbaikan Data</button>
+                                @if ($marbot->deadline_perbaikan && $marbot->deadline_perbaikan->endOfDay()->isPast())
+                                    <button type="button" class="btn btn-secondary btn-lg fw-bold" disabled>
+                                        <i class="fas fa-lock me-2"></i> Batas Waktu Habis
+                                    </button>
+                                @else
+                                    <button type="button" id="btn-submit-perbaikan"
+                                        class="btn btn-warning btn-lg fw-bold"><i class="fas fa-paper-plane me-2"></i>
+                                        Kirim
+                                        Perbaikan Data</button>
+                                @endif
                             </div>
                         </form>
                     </div>
