@@ -478,6 +478,13 @@ class MarbotController extends Controller
             Alert::success('Berhasil', 'Permohonan telah ditolak.');
 
             return redirect()->route('marbot.index');
+        } elseif ($request->action == 'restore') {
+            $marbot->status = 'diajukan';
+            // Optional: keep notes or clear them? Usually clear rejection note if re-evaluating.
+            // $marbot->catatan = null; 
+            $marbot->save();
+            Alert::success('Berhasil', 'Status marbot dikembalikan ke Diajukan data bisa diedit dan diverifikasi ulang.');
+            return redirect()->back();
 
         } elseif ($request->action == 'edit_data') {
             // Admin Edit Data

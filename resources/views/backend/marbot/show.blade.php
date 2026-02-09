@@ -543,7 +543,7 @@
                     <div class="card bg-dark text-white shadow-lg border-0 mb-4 rounded-3 overflow-hidden">
                         <div class="card-body text-center p-5 position-relative">
                             <div class="position-absolute top-0 start-0 w-100 h-100"
-                                style="background: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1;">
+                                style="background: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1; pointer-events: none;">
                             </div>
                             <i class="fas fa-times-circle fa-4x mb-3 text-white-50"></i>
                             <h4 class="fw-bold">PERMOHONAN DITOLAK</h4>
@@ -556,6 +556,26 @@
                                 </div>
                             @endif
                             <small>Ditolak pada: {{ $marbot->updated_at->format('d M Y') }}</small>
+
+                            <hr class="border-light opacity-25 my-4">
+
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="{{ route('marbot.edit', $marbot->uuid) }}"
+                                    class="btn btn-outline-light btn-sm bg-white bg-opacity-10 text-white border-0">
+                                    <i class="fas fa-edit me-1"></i> Edit Data
+                                </a>
+
+                                <form action="{{ route('marbot.update', $marbot->uuid) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="action" value="restore">
+                                    <button type="submit"
+                                        class="btn btn-warning btn-sm text-dark fw-bold border-0 shadow-sm"
+                                        onclick="return confirm('Kembalikan status ke Diajukan untuk ditinjau ulang?')">
+                                        <i class="fas fa-undo-alt me-1"></i> Tinjau Ulang
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 @else
