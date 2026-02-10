@@ -47,6 +47,11 @@ class SktMushalla extends Model
         return 'uuid';
     }
 
+    public function marbots()
+    {
+        return $this->hasMany(Marbot::class, 'rumah_ibadah_id')->where('tipe_rumah_ibadah', 'Mushalla');
+    }
+
     public function tipologiMushalla(): BelongsTo
     {
         return $this->belongsTo(TipologiMushalla::class);

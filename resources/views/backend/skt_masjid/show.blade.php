@@ -46,6 +46,20 @@
                                 <td>{{ $sktMasjid->tipologiMasjid->nama_tipologi ?? '-' }}</td>
                             </tr>
                             <tr>
+                                <th class="text-start bg-light">Nama Marbot</th>
+                                <td>
+                                    @if ($sktMasjid->marbots->count() > 0)
+                                        <ul class="mb-0 ps-3">
+                                            @foreach ($sktMasjid->marbots as $marbot)
+                                                <li>{{ $marbot->nama_lengkap }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
                                 <th class="text-start bg-light">Alamat</th>
                                 <td class="text-capitalize">
                                     {{ $sktMasjid->alamat_masjid }} <br>

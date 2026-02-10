@@ -53,7 +53,7 @@ class SktMasjidController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = SktMasjid::with(['kecamatan', 'kelurahan', 'tipologiMasjid'])
+            $data = SktMasjid::with(['kecamatan', 'kelurahan', 'tipologiMasjid', 'marbots'])
                 ->select('skt_masjids.*');
 
             if ($request->has('kecamatan_id') && $request->kecamatan_id != '') {
@@ -70,6 +70,9 @@ class SktMasjidController extends Controller
                 })
                 ->addColumn('tipologi', function ($row) {
                     return $row->tipologiMasjid->nama_tipologi ?? '-';
+                })
+                ->addColumn('marbot', function ($row) {
+                    return $row->marbots->pluck('nama_lengkap')->implode(', ') ?: '-';
                 })
                 ->addColumn('action', function ($row) {
                     $btn = '<div class="btn-group">';
@@ -153,7 +156,7 @@ class SktMasjidController extends Controller
 
     public function show($id)
     {
-        $sktMasjid = SktMasjid::with(['kecamatan', 'kelurahan', 'tipologiMasjid'])->where('uuid', $id)->firstOrFail();
+        $sktMasjid = SktMasjid::with(['kecamatan', 'kelurahan', 'tipologiMasjid', 'marbots'])->where('uuid', $id)->firstOrFail();
 
         return view('backend.skt_masjid.show', compact('sktMasjid'));
     }

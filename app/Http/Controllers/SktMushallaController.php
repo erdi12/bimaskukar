@@ -99,7 +99,7 @@ class SktMushallaController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = SktMushalla::with(['kecamatan', 'kelurahan', 'tipologiMushalla'])
+            $data = SktMushalla::with(['kecamatan', 'kelurahan', 'tipologiMushalla', 'marbots'])
                 ->select('skt_mushallas.*')
                 ->latest();
 
@@ -117,6 +117,9 @@ class SktMushallaController extends Controller
                 })
                 ->addColumn('tipologi', function ($row) {
                     return $row->tipologiMushalla->nama_tipologi ?? '-';
+                })
+                ->addColumn('marbot', function ($row) {
+                    return $row->marbots->pluck('nama_lengkap')->implode(', ') ?: '-';
                 })
                 ->addColumn('action', function ($row) {
                     $btn = '<div class="btn-group">';
@@ -189,7 +192,7 @@ class SktMushallaController extends Controller
 
     public function show($id)
     {
-        $sktMushalla = SktMushalla::with(['kecamatan', 'kelurahan', 'tipologiMushalla'])->where('uuid', $id)->firstOrFail();
+        $sktMushalla = SktMushalla::with(['kecamatan', 'kelurahan', 'tipologiMushalla', 'marbots'])->where('uuid', $id)->firstOrFail();
 
         return view('backend.skt_mushalla.show', compact('sktMushalla'));
     }

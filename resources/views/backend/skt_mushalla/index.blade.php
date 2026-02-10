@@ -94,6 +94,7 @@
                                     <th>Nama Mushalla</th>
                                     <th>Lokasi (Kel/Kec)</th>
                                     <th>Tipologi</th>
+                                    <th>Nama Marbot</th>
                                     <th width="150" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -261,6 +262,13 @@
                     {
                         data: 'tipologi',
                         name: 'tipologi'
+                    },
+                    {
+                        data: 'marbot',
+                        name: 'marbot',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-capitalize'
                     },
                     {
                         data: 'action',

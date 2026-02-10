@@ -47,6 +47,11 @@ class SktMasjid extends Model
         return 'uuid';
     }
 
+    public function marbots()
+    {
+        return $this->hasMany(Marbot::class, 'rumah_ibadah_id')->where('tipe_rumah_ibadah', 'Masjid');
+    }
+
     public function tipologiMasjid(): BelongsTo
     {
         return $this->belongsTo(TipologiMasjid::class);
