@@ -125,7 +125,16 @@ class SktMushallaController extends Controller
                     $btn = '<div class="btn-group">';
 
                     $btn .= '<a href="'.route('skt_mushalla.show', $row->uuid).'" class="btn btn-sm btn-outline-info" title="Detail"><i class="fas fa-eye"></i></a>';
-                    $btn .= '<a href="'.route('skt_mushalla.cetak_skt', $row->uuid).'" class="btn btn-sm btn-outline-success" target="_blank" title="Cetak SKT"><i class="fas fa-print"></i></a>';
+                    
+                    $btn .= '<div class="btn-group">';
+                    $btn .= '<button type="button" class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Cetak">';
+                    $btn .= '<i class="fas fa-print"></i>';
+                    $btn .= '</button>';
+                    $btn .= '<div class="dropdown-menu">';
+                    $btn .= '<a class="dropdown-item" href="'.route('skt_mushalla.cetak_skt', $row->uuid).'" target="_blank">Cetak SKT</a>';
+                    $btn .= '<a class="dropdown-item" href="'.route('skt_mushalla.cetak_rekomendasi', $row->uuid).'" target="_blank">Cetak Rekomendasi Bantuan</a>';
+                    $btn .= '</div>';
+                    $btn .= '</div>';
 
                     if (auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Editor') || auth()->user()->hasRole('Operator')) {
                         $btn .= '<button onclick="editData(\''.$row->uuid.'\')" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fas fa-edit"></i></button>';
@@ -249,6 +258,7 @@ class SktMushallaController extends Controller
         try {
             $sktMushalla = SktMushalla::with(['kecamatan', 'kelurahan', 'tipologiMushalla'])->where('uuid', $id)->firstOrFail();
 
+
             // Catat aktivitas cetak SKT Mushalla
             activity()
                 ->performedOn($sktMushalla)
@@ -309,6 +319,85 @@ class SktMushallaController extends Controller
 
             // Buat nama file
             $fileName = $sktMushalla->nomor_id_mushalla.' - '.$sktMushalla->nama_mushalla.' - SKT.pdf';
+            $fileName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $fileName);
+
+            return $pdf->stream($fileName);
+
+        } catch (\Exception $e) {
+            \Log::error('PDF Generation Error: '.$e->getMessage());
+
+            return response()->view('errors.custom', [
+                'message' => 'Gagal membuat PDF: '.$e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ], 500);
+        }
+    }
+
+    public function cetakRekomendasi($id)
+    {
+        try {
+            $sktMushalla = SktMushalla::with(['kecamatan', 'kelurahan', 'tipologiMushalla'])->where('uuid', $id)->firstOrFail();
+
+            // Catat aktivitas cetak Rekomendasi Mushalla
+            activity()
+                ->performedOn($sktMushalla)
+                ->causedBy(auth()->user())
+                ->event('cetak_rekomendasi_mushalla')
+                ->log('Mencetak Rekomendasi Mushalla');
+
+            $logoPath = public_path('images/kemenag/kemenag.png');
+            $logoBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath));
+
+            // Setup additional image
+            $additionalImageBase64 = null;
+            $barcodePath = null;
+
+            if ($sktMushalla->file_barcode_mushalla) {
+                $barcodePath = storage_path('app/public/mushalla_barcodes/'.$sktMushalla->file_barcode_mushalla);
+            }
+
+            if ($barcodePath && file_exists($barcodePath)) {
+                $additionalImageBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($barcodePath));
+            } else {
+                // Fallback to logo if no barcode or file missing
+                $additionalImagePath = public_path('images/kemenag/kemenag.png');
+                if (file_exists($additionalImagePath)) {
+                    $additionalImageBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($additionalImagePath));
+                }
+            }
+
+            // Setup variables for the view
+            $data = [
+                'sktMushalla' => $sktMushalla,
+                'logoBase64' => $logoBase64,
+                'additionalImageBase64' => $additionalImageBase64,
+                'nomor_naskah' => $sktMushalla->nomor_id_mushalla,
+                'tanggal_naskah' => \Carbon\Carbon::now()->isoFormat('D MMMM Y'),
+                'nama_pengirim' => 'Ariyadi F, S.Ag.',
+                'nip_pengirim' => '19770805 199803 1 003',
+                'jabatan_pengirim' => 'Kepala Kantor Kementerian Agama Kabupaten Kutai Kartanegara',
+                'ttd_pengirim' => 'Ariyadi F, S.Ag.',
+            ];
+
+            // Generate PDF menggunakan DomPDF
+            $pdf = Pdf::loadView('backend.skt_mushalla.cetak_rekomendasi', $data)
+                ->setPaper('A4')
+                ->setOption('margin-top', 10)
+                ->setOption('margin-right', 10)
+                ->setOption('margin-bottom', 10)
+                ->setOption('margin-left', 10)
+                ->setOption('isHtml5ParserEnabled', true)
+                ->setOption('chroot', public_path());
+
+            // Register custom font ke DomPDF if exists
+            $fontPath = public_path('fonts/imprint-mt-shadow.ttf');
+            if (file_exists($fontPath)) {
+                $pdf->getDomPDF()->getOptions()->set('fontDir', public_path('fonts'));
+                $pdf->getDomPDF()->getOptions()->set('fontCache', storage_path('logs'));
+            }
+
+            // Buat nama file
+            $fileName = $sktMushalla->nomor_id_mushalla.' - '.$sktMushalla->nama_mushalla.' - Rekomendasi.pdf';
             $fileName = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $fileName);
 
             return $pdf->stream($fileName);

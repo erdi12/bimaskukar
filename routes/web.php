@@ -165,6 +165,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('appv2/skt-mushalla/export', [\App\Http\Controllers\SktMushallaController::class, 'export'])->name('skt_mushalla.export');
         Route::get('appv2/skt-mushalla/template', [\App\Http\Controllers\SktMushallaController::class, 'downloadTemplate'])->name('skt_mushalla.template');
         Route::get('appv2/skt-mushalla/{id}/cetak-skt', [\App\Http\Controllers\SktMushallaController::class, 'cetakSkt'])->name('skt_mushalla.cetak_skt');
+        Route::get('appv2/skt-mushalla/{id}/cetak-rekomendasi', [\App\Http\Controllers\SktMushallaController::class, 'cetakRekomendasi'])->name('skt_mushalla.cetak_rekomendasi');
         Route::get('appv2/skt-mushalla', [\App\Http\Controllers\SktMushallaController::class, 'index'])->name('skt_mushalla.index');
         Route::get('appv2/skt-mushalla/{skt_mushalla}', [\App\Http\Controllers\SktMushallaController::class, 'show'])->name('skt_mushalla.show');
 
