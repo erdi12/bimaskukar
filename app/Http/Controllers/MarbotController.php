@@ -559,10 +559,11 @@ class MarbotController extends Controller
         $startDate = $request->start_date;
         $endDate = $request->end_date;
         $status = $request->status;
+        $kecamatanId = $request->kecamatan_id;
 
         $filename = 'Data_Marbot_'.($startDate ?? 'Semua').'_sd_'.($endDate ?? 'Semua').'.xlsx';
 
-        return Excel::download(new MarbotExport($startDate, $endDate, $status), $filename);
+        return Excel::download(new MarbotExport($startDate, $endDate, $status, $kecamatanId), $filename);
     }
 
     public function import(Request $request)

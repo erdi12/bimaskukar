@@ -25,13 +25,16 @@ class MarbotExport extends DefaultValueBinder implements FromQuery, ShouldAutoSi
 
     protected $status;
 
+    protected $kecamatanId;
+
     private $rowNumber = 0;
 
-    public function __construct($startDate, $endDate, $status = null)
+    public function __construct($startDate, $endDate, $status = null, $kecamatanId = null)
     {
         $this->startDate = $startDate ? Carbon::parse($startDate)->startOfDay() : null;
         $this->endDate = $endDate ? Carbon::parse($endDate)->endOfDay() : null;
         $this->status = $status;
+        $this->kecamatanId = $kecamatanId;
     }
 
     public function query()
@@ -44,6 +47,10 @@ class MarbotExport extends DefaultValueBinder implements FromQuery, ShouldAutoSi
 
         if ($this->status && $this->status !== 'semua') {
             $query->where('status', $this->status);
+        }
+
+        if ($this->kecamatanId) {
+            $query->where('kecamatan_id', $this->kecamatanId);
         }
 
         return $query->latest();

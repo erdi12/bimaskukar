@@ -445,6 +445,15 @@
                                 <option value="diajukan">Diajukan</option>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kecamatan</label>
+                            <select class="form-select" name="kecamatan_id">
+                                <option value="">Semua Kecamatan</option>
+                                @foreach ($kecamatans as $kec)
+                                    <option value="{{ $kec->id }}">{{ ucwords($kec->kecamatan) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="row">
                             <div class="col-6">
                                 <label class="form-label">Dari</label>
