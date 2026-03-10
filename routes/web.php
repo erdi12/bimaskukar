@@ -135,6 +135,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('appv2/marbot/check_deadline', [\App\Http\Controllers\MarbotController::class, 'checkDeadline'])->name('marbot.check_deadline');
 
         Route::resource('appv2/marbot', \App\Http\Controllers\MarbotController::class)->names('marbot');
+
+        // Kegiatan / Calendar
+        Route::resource('appv2/kegiatan', \App\Http\Controllers\KegiatanController::class)->names('kegiatan')->except(['create', 'show', 'edit']);
     });
 
     /*

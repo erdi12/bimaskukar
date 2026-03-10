@@ -76,6 +76,14 @@
             </a>
         </div>
 
+        {{-- Calendar Kegiatan --}}
+        <div class="menu-item @yield('kegiatan')" data-tooltip="Calendar Kegiatan">
+            <a href="{{ route('kegiatan.index') }}" class="menu-link">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Agenda / Kegiatan</span>
+            </a>
+        </div>
+
         {{-- Layanan --}}
         <div class="sidebar-title">Layanan</div>
         <div class="menu-item @yield('sub-layanan')" data-tooltip="Layanan">
