@@ -88,4 +88,18 @@ class FrontendController extends Controller
 
         return view('frontend.data_keagamaan', compact('data', 'tab', 'search', 'totalMajelis', 'totalMasjid', 'totalMushalla', 'kecamatanSummary'));
     }
+
+    public function agendaKegiatan(Request $request)
+    {
+        if ($request->ajax() || $request->wantsJson() || $request->has('start')) {
+            $start = date('Y-m-d', strtotime($request->start));
+            $end = date('Y-m-d', strtotime($request->end));
+
+            $data = \App\Models\Kegiatan::where('start_date', '>=', $start)
+                ->where('start_date', '<=', $end)
+                ->get(['id', 'title', 'start_date as start', 'end_date as end', 'color', 'description', 'location', 'petugas', 'type']);
+            return response()->json($data);
+        }
+        return view('frontend.kegiatan');
+    }
 }

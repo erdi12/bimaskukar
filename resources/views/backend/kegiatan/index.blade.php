@@ -5,11 +5,171 @@
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
     <style>
+        /* Modern Calendar Styles */
+        .fc {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 1rem;
+        }
+
+        .fc-theme-standard .fc-scrollgrid {
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            border-radius: 0 0 1rem 1rem;
+            overflow: hidden;
+        }
+
+        .fc-theme-standard td,
+        .fc-theme-standard th {
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .fc-col-header-cell {
+            padding: 12px 0 !important;
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .fc-daygrid-day-number {
+            font-weight: 500;
+            color: #495057;
+            padding: 8px !important;
+            font-size: 0.95rem;
+            text-decoration: none !important;
+            transition: all 0.2s ease;
+        }
+
+        .fc-daygrid-day-number:hover {
+            color: #435ebe;
+        }
+
+        .fc .fc-day-today {
+            background-color: rgba(67, 94, 190, 0.03) !important;
+        }
+
+        .fc .fc-day-today .fc-daygrid-day-number {
+            background-color: #435ebe;
+            color: white !important;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;
+            box-shadow: 0 4px 8px rgba(67, 94, 190, 0.3);
+        }
+
         .fc-event {
             cursor: pointer;
+            border: none !important;
+            border-radius: 6px;
+            padding: 3px 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .fc-event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            filter: brightness(1.05);
+        }
+
+        .fc-event-title {
+            font-weight: 600 !important;
+        }
+
+        .fc .fc-button-primary {
+            background-color: #fff;
+            color: #495057;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            text-transform: capitalize;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .fc .fc-button-primary:not(:disabled):active,
+        .fc .fc-button-primary:not(:disabled).fc-button-active {
+            background-color: #435ebe;
+            border-color: #435ebe;
+            color: white;
+            box-shadow: 0 3px 8px rgba(67, 94, 190, 0.25);
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: #f8f9fa;
+            color: #435ebe;
+            border-color: #435ebe;
+            transform: translateY(-1px);
+        }
+
+        .fc .fc-toolbar-title {
+            font-weight: 700;
+            color: #2b3990;
+            font-size: 1.5rem !important;
+        }
+
+        .card-modern {
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* Modern Modal Styles */
+        .modal-content.custom-rounded {
+            border-radius: 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+
+        .modal-header-custom {
+            background: rgba(67, 94, 190, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1.25rem 1.5rem;
+        }
+
+        .modal-body-custom {
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 0.5rem;
+            border: 1px solid #dee2e6;
+            padding: 0.6rem 1rem;
+            background-color: #fcfcfc;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background-color: #fff;
+            border-color: #435ebe;
+            box-shadow: 0 0 0 0.25rem rgba(67, 94, 190, 0.15);
         }
 
         /* Responsive Improvements */
+        @media (min-width: 992px) {
+            .border-end-lg {
+                border-right: 1px solid #e9ecef;
+            }
+        }
+
         @media (max-width: 767.98px) {
             .fc .fc-toolbar.fc-header-toolbar {
                 flex-direction: column;
@@ -52,70 +212,90 @@
 
     <!-- Modal Kegiatan -->
     <div class="modal fade" id="kegiatanModal" tabindex="-1" aria-labelledby="kegiatanModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content custom-rounded">
                 <form id="formKegiatan">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="kegiatanModalLabel">Detail Kegiatan</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="modal-header-custom d-flex justify-content-between align-items-center">
+                        <h5 class="modal-title fw-bold text-primary" id="kegiatanModalLabel"><i
+                                class="fas fa-calendar-plus me-2"></i> Detail Kegiatan</h5>
+                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body-custom">
                         <input type="hidden" id="kegiatan_id" name="kegiatan_id">
 
-                        <div class="mb-3">
-                            <label class="form-label">Nama Kegiatan <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="title" name="title" required>
-                        </div>
-
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
-                                <input type="datetime-local" class="form-control" id="start_date" name="start_date"
-                                    required>
+                            <!-- Left Column -->
+                            <div class="col-lg-6 pe-lg-4 border-end-lg mb-3 mb-lg-0">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Kegiatan <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="title" name="title" required
+                                        placeholder="Contoh: Rapat Koordinasi Tahunan">
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-6 mb-3">
+                                        <label class="form-label">Waktu Mulai <span class="text-danger">*</span></label>
+                                        <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
+                                    </div>
+                                    <div class="col-sm-6 mb-3">
+                                        <label class="form-label">Waktu Selesai <span class="text-danger">*</span></label>
+                                        <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Jenis Kegiatan <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="type" name="type" required>
+                                        <option value="">Pilih Jenis</option>
+                                        <option value="Rapat">Rapat</option>
+                                        <option value="Perjalanan Dinas">Perjalanan Dinas</option>
+                                        <option value="Seminar">Seminar</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Warna Label Kalender</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0"><i
+                                                class="fas fa-palette text-muted"></i></span>
+                                        <input type="color" class="form-control form-control-color border-start-0 ps-0 w-100"
+                                            id="color" name="color" value="#435ebe"
+                                            title="Pilih warna untuk membedakan kegiatan" style="height: 45px; padding: 5px;">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tanggal Selesai <span class="text-danger">*</span></label>
-                                <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
+
+                            <!-- Right Column -->
+                            <div class="col-lg-6 ps-lg-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Lokasi / Tempat</label>
+                                    <input type="text" class="form-control" id="location" name="location"
+                                        placeholder="Lokasi Pelaksanaan">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Petugas / PIC</label>
+                                    <input type="text" class="form-control" id="petugas" name="petugas"
+                                        placeholder="Nama Petugas atau Penanggung Jawab">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Keterangan Tambahan</label>
+                                    <textarea class="form-control" id="description" name="description" rows="5"
+                                        placeholder="Informasi tambahan terkait kegiatan ini..." style="height: 135px;"></textarea>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Jenis Kegiatan <span class="text-danger">*</span></label>
-                            <select class="form-select" id="type" name="type" required>
-                                <option value="">Pilih Jenis</option>
-                                <option value="Rapat">Rapat</option>
-                                <option value="Perjalanan Dinas">Perjalanan Dinas</option>
-                                <option value="Seminar">Seminar</option>
-                                <option value="Lainnya">Lainnya</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Petugas / PIC</label>
-                            <input type="text" class="form-control" id="petugas" name="petugas"
-                                placeholder="Nama Petugas atau Penanggung Jawab">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Lokasi / Tempat</label>
-                            <input type="text" class="form-control" id="location" name="location">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Warna Label</label>
-                            <input type="color" class="form-control form-control-color w-100" id="color"
-                                name="color" value="#3788d8" title="Pilih warna untuk membedakan kegiatan">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Keterangan</label>
-                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger me-auto d-none" id="btnDeleteEvent">Hapus</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-primary" id="btnSaveEvent">Simpan</button>
+                    <div class="modal-footer border-0 px-4 pb-4 pt-0 bg-white">
+                        <button type="button" class="btn btn-outline-danger me-auto d-none px-4 rounded-pill"
+                            id="btnDeleteEvent"><i class="fas fa-trash-alt me-1"></i> Hapus</button>
+                        <button type="button" class="btn btn-secondary px-4 rounded-pill"
+                            data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm" id="btnSaveEvent"><i
+                                class="fas fa-save me-1"></i> Simpan</button>
                     </div>
                 </form>
             </div>
@@ -126,6 +306,7 @@
 @push('scripts')
     <!-- FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/id.global.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
@@ -135,6 +316,7 @@
             var isMobile = window.innerWidth < 768;
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
+                locale: 'id',
                 initialView: isMobile ? 'listMonth' : 'dayGridMonth',
                 headerToolbar: {
                     left: 'prev,next today',

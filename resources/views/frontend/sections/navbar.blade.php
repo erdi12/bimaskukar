@@ -19,6 +19,10 @@
                           class="nav-link text-primary-custom {{ request()->routeIs('data_keagamaan') ? 'fw-bold' : '' }}"
                           href="{{ route('data_keagamaan') }}">Data Keagamaan</a></li>
                   <li class="nav-item"><a
+                          class="nav-link text-primary-custom {{ request()->routeIs('agenda.kegiatan') ? 'active fw-bold' : '' }}"
+                          href="{{ route('agenda.kegiatan') }}">Agenda</a>
+                  </li>
+                  <li class="nav-item"><a
                           class="nav-link text-primary-custom {{ request()->routeIs('kontak') ? 'active fw-bold' : '' }}"
                           href="{{ route('kontak') }}">Kontak</a>
                   </li>

@@ -16,6 +16,7 @@ Route::get('/profil', [\App\Http\Controllers\FrontendController::class, 'profil'
 Route::get('/layanan/{slug}', [\App\Http\Controllers\FrontendController::class, 'detailLayanan'])->name('layanan.detail');
 Route::get('/kontak', [\App\Http\Controllers\FrontendController::class, 'kontak'])->name('kontak');
 Route::get('/data-keagamaan', [\App\Http\Controllers\FrontendController::class, 'dataKeagamaan'])->name('data_keagamaan');
+Route::get('/agenda-kegiatan', [\App\Http\Controllers\FrontendController::class, 'agendaKegiatan'])->name('agenda.kegiatan');
 
 // Cek Validitas - Form pencarian
 Route::get('/cek-validitas', [\App\Http\Controllers\ValiditasController::class, 'index'])
