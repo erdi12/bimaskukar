@@ -36,7 +36,8 @@ class SktpiagammtExport implements FromCollection, WithHeadings, WithMapping
             'jumlah_anggota',
             'materi',
             'mendaftar',
-            'mendaftar_ulang'
+            'mendaftar_ulang',
+            'diposting_pada'
         ];
     }
 
@@ -74,7 +75,8 @@ class SktpiagammtExport implements FromCollection, WithHeadings, WithMapping
             $row->jumlah_anggota,
             $row->materi,
             Carbon::parse($row->mendaftar)->locale('id')->format('j F Y'),
-            Carbon::parse($row->mendaftar_ulang)->locale('id')->format('j F Y')
+            Carbon::parse($row->mendaftar_ulang)->locale('id')->format('j F Y'),
+            $row->created_at->format('d-m-Y H:i:s')
         ];
     }
 }

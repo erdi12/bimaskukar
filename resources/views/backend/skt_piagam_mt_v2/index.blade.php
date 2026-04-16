@@ -59,7 +59,7 @@
                                             data-bs-toggle="modal" data-bs-target="#importExcelModal">
                                             <i class="fas fa-file-excel me-2"></i>Import Excel
                                         </button>
-                                        <a href="{{ route('skt_piagam_mt.export') }}"
+                                        <a href="{{ route('skt_piagam_mt_v2.export') }}"
                                             class="btn btn-outline-info rounded-pill w-100 w-md-auto">
                                             <i class="fas fa-download me-2"></i>Export Excel
                                         </a>

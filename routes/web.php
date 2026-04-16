@@ -200,7 +200,7 @@ Route::middleware(['auth'])->group(function () {
     // Secure Import/Export Legacy
     Route::middleware(['role:Admin,Editor,Operator'])->group(function () {
         Route::post('/skt-piagam-mt/import', [SktpiagammtController::class, 'import'])->name('skt_piagam_mt.import');
-        Route::post('/skt-piagam-mt/export', [SktpiagammtController::class, 'export'])->name('skt_piagam_mt.export');
+        Route::get('/skt-piagam-mt/export', [SktpiagammtController::class, 'export'])->name('skt_piagam_mt.export');
         Route::get('/skt-piagam-mt/template', [SktpiagammtController::class, 'downloadTemplate'])->name('skt_piagam_mt.template');
     });
 
