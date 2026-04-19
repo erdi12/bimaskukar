@@ -115,6 +115,16 @@
             </div>
         </div>
 
+        {{-- Seleksi Berkas --}}
+        @if(auth()->check() && auth()->user()->hasAnyRole(['Admin', 'Editor', 'Operator']))
+            <div class="menu-item @yield('seleksi-berkas')" data-tooltip="Seleksi Berkas">
+                <a href="{{ route('seleksi_berkas.index') }}" class="menu-link @yield('seleksi_berkas')">
+                    <i class="fas fa-folder-open"></i>
+                    <span>Seleksi Berkas</span>
+                </a>
+            </div>
+        @endif
+
         {{-- Data Master --}}
         <div class="sidebar-title">DATA MASTER</div>
         <div class="menu-item @yield('data-master')" data-tooltip="Data Master">

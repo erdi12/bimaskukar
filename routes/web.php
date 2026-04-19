@@ -18,6 +18,12 @@ Route::get('/kontak', [\App\Http\Controllers\FrontendController::class, 'kontak'
 Route::get('/data-keagamaan', [\App\Http\Controllers\FrontendController::class, 'dataKeagamaan'])->name('data_keagamaan');
 Route::get('/agenda-kegiatan', [\App\Http\Controllers\FrontendController::class, 'agendaKegiatan'])->name('agenda.kegiatan');
 
+// Seleksi Berkas - Public
+Route::get('/seleksi-berkas/{slug}', [\App\Http\Controllers\PengajuanBerkasController::class, 'show'])->name('seleksi_berkas.show');
+Route::post('/seleksi-berkas/{slug}', [\App\Http\Controllers\PengajuanBerkasController::class, 'store'])->name('seleksi_berkas.store');
+Route::get('/seleksi-berkas/{slug}/sukses', [\App\Http\Controllers\PengajuanBerkasController::class, 'sukses'])->name('seleksi_berkas.sukses');
+Route::get('/cek-tiket', [\App\Http\Controllers\PengajuanBerkasController::class, 'cekTiket'])->name('cek_tiket');
+
 // Cek Validitas - Form pencarian
 Route::get('/cek-validitas', [\App\Http\Controllers\ValiditasController::class, 'index'])
     ->name('cek_validitas');
@@ -139,6 +145,17 @@ Route::middleware(['auth'])->group(function () {
 
         // Kegiatan / Calendar
         Route::resource('appv2/kegiatan', \App\Http\Controllers\KegiatanController::class)->names('kegiatan')->except(['create', 'show', 'edit']);
+
+        // Seleksi Berkas - Backend Admin
+        Route::get('appv2/seleksi-berkas', [\App\Http\Controllers\SeleksiBerkasController::class, 'index'])->name('seleksi_berkas.index');
+        Route::get('appv2/seleksi-berkas/create', [\App\Http\Controllers\SeleksiBerkasController::class, 'create'])->name('seleksi_berkas.create');
+        Route::post('appv2/seleksi-berkas', [\App\Http\Controllers\SeleksiBerkasController::class, 'store'])->name('seleksi_berkas.store_admin');
+        Route::get('appv2/seleksi-berkas/{seleksi_berkas}/edit', [\App\Http\Controllers\SeleksiBerkasController::class, 'edit'])->name('seleksi_berkas.edit');
+        Route::put('appv2/seleksi-berkas/{seleksi_berkas}', [\App\Http\Controllers\SeleksiBerkasController::class, 'update'])->name('seleksi_berkas.update');
+        Route::delete('appv2/seleksi-berkas/{seleksi_berkas}', [\App\Http\Controllers\SeleksiBerkasController::class, 'destroy'])->name('seleksi_berkas.destroy');
+        Route::get('appv2/seleksi-berkas/{seleksi_berkas}/pengajuan', [\App\Http\Controllers\SeleksiBerkasController::class, 'pengajuan'])->name('seleksi_berkas.pengajuan');
+        Route::get('appv2/seleksi-berkas/{seleksi_berkas}/pengajuan/{pengajuan}', [\App\Http\Controllers\SeleksiBerkasController::class, 'showPengajuan'])->name('seleksi_berkas.show_pengajuan');
+        Route::post('appv2/pengajuan-berkas/{pengajuan}/status', [\App\Http\Controllers\SeleksiBerkasController::class, 'updateStatus'])->name('pengajuan_berkas.update_status');
     });
 
     /*
