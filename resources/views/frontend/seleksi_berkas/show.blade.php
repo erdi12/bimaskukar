@@ -32,6 +32,23 @@
         font-weight: 700; font-size: 14px;
         flex-shrink: 0;
     }
+    /* Signature Pad */
+    .signature-wrapper {
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        background: #fafafa;
+        overflow: hidden;
+    }
+    .signature-wrapper canvas {
+        display: block;
+        width: 100%;
+        height: 180px;
+        cursor: crosshair;
+        touch-action: none;
+    }
+    .signature-wrapper.signed { border-color: #2A9D8F; background: rgba(42,157,143,0.04); }
+    /* Checkbox group */
+    .checkbox-group-item { cursor: pointer; margin-bottom: 6px; }
 </style>
 @endpush
 
@@ -136,19 +153,89 @@
 
                             @php $fieldConfigs = $seleksi->field_configs ?? []; @endphp
                             @foreach($fieldConfigs as $field)
-                                <div class="col-md-6">
+                                @php $fieldType = $field['type'] ?? 'text'; @endphp
+                                <div class="col-md-{{ in_array($fieldType, ['signature','checkbox']) ? '12' : '6' }}">
                                     <label class="form-label fw-bold">
                                         {{ $field['label'] }}
                                         @if(!empty($field['required']))<span class="text-danger">*</span>@endif
                                     </label>
-                                    @if(($field['type'] ?? 'text') === 'textarea')
+
+                                    @if($fieldType === 'textarea')
                                         <textarea name="field_{{ $field['name'] }}" class="form-control" rows="3"
                                                   {{ !empty($field['required']) ? 'required' : '' }}>{{ old('field_' . $field['name']) }}</textarea>
-                                    @elseif(($field['type'] ?? 'text') === 'date')
+
+                                    @elseif($fieldType === 'date')
                                         <input type="date" name="field_{{ $field['name'] }}" class="form-control"
                                                value="{{ old('field_' . $field['name']) }}"
                                                {{ !empty($field['required']) ? 'required' : '' }}>
-                                    @elseif(($field['type'] ?? 'text') === 'kecamatan')
+
+                                    @elseif($fieldType === 'select')
+                                        @php
+                                            $selOptions = $field['options'] ?? [];
+                                            $oldVal     = old('field_' . $field['name']);
+                                        @endphp
+                                        <select name="field_{{ $field['name'] }}"
+                                                class="form-select"
+                                                {{ !empty($field['required']) ? 'required' : '' }}>
+                                            <option value="">-- Pilih salah satu --</option>
+                                            @foreach($selOptions as $selOpt)
+                                                <option value="{{ $selOpt }}" {{ $oldVal === $selOpt ? 'selected' : '' }}>
+                                                    {{ $selOpt }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                    @elseif($fieldType === 'checkbox')
+                                        @php
+                                            $cbOptions  = $field['options'] ?? [];
+                                            $oldValues  = (array) old('field_' . $field['name'], []);
+                                        @endphp
+                                        <div class="border rounded-3 p-3 bg-light">
+                                            @if(count($cbOptions) > 0)
+                                                @foreach($cbOptions as $cbIdx => $option)
+                                                    <div class="form-check checkbox-group-item">
+                                                        <input class="form-check-input" type="checkbox"
+                                                               name="field_{{ $field['name'] }}[]"
+                                                               id="cb_{{ $field['name'] }}_{{ $cbIdx }}"
+                                                               value="{{ $option }}"
+                                                               {{ in_array($option, $oldValues) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="cb_{{ $field['name'] }}_{{ $cbIdx }}">
+                                                            {{ $option }}
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="field_{{ $field['name'] }}"
+                                                           id="cb_{{ $field['name'] }}"
+                                                           value="Ya"
+                                                           {{ old('field_' . $field['name']) ? 'checked' : '' }}
+                                                           {{ !empty($field['required']) ? 'required' : '' }}>
+                                                    <label class="form-check-label" for="cb_{{ $field['name'] }}">Ya, Saya Setuju</label>
+                                                </div>
+                                            @endif
+                                        </div>
+
+
+                                    @elseif($fieldType === 'signature')
+                                        <div class="signature-wrapper" id="sig-wrapper-{{ $field['name'] }}">
+                                            <canvas id="sig-canvas-{{ $field['name'] }}"></canvas>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mt-1">
+                                            <small class="text-muted"><i class="fas fa-pen me-1"></i>Tanda tangani di kotak atas menggunakan mouse atau sentuhan</small>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill ms-2"
+                                                    onclick="clearSignature('{{ $field['name'] }}')">
+                                                <i class="fas fa-undo me-1"></i>Hapus
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="field_{{ $field['name'] }}"
+                                               id="sig-input-{{ $field['name'] }}"
+                                               class="signature-hidden-input"
+                                               data-field="{{ $field['name'] }}"
+                                               {{ !empty($field['required']) ? 'required' : '' }}>
+
+                                    @elseif($fieldType === 'kecamatan')
                                         <select name="field_{{ $field['name'] }}"
                                                 class="form-select field-kecamatan"
                                                 id="kec_{{ $field['name'] }}"
@@ -162,7 +249,8 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                    @elseif(($field['type'] ?? 'text') === 'kelurahan')
+
+                                    @elseif($fieldType === 'kelurahan')
                                         <select name="field_{{ $field['name'] }}"
                                                 class="form-select field-kelurahan"
                                                 id="kel_{{ $field['name'] }}"
@@ -173,14 +261,16 @@
                                         <div class="form-text text-muted">
                                             <i class="fas fa-info-circle me-1"></i>Pilih kecamatan terlebih dahulu
                                         </div>
+
                                     @else
-                                        <input type="{{ $field['type'] ?? 'text' }}" name="field_{{ $field['name'] }}"
+                                        <input type="{{ $fieldType }}" name="field_{{ $field['name'] }}"
                                                class="form-control"
                                                value="{{ old('field_' . $field['name']) }}"
                                                {{ !empty($field['required']) ? 'required' : '' }}>
                                     @endif
                                 </div>
                             @endforeach
+
                         </div>
                     </div>
                 </div>
@@ -252,7 +342,61 @@
 @endsection
 
 @push('scripts')
+{{-- Signature Pad Library --}}
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <script>
+// ==========================================
+// Signature Pad Initialization
+// ==========================================
+const signaturePads = {};
+
+function initSignaturePads() {
+    document.querySelectorAll('[id^="sig-canvas-"]').forEach(canvas => {
+        const fieldName = canvas.id.replace('sig-canvas-', '');
+        const wrapper   = document.getElementById('sig-wrapper-' + fieldName);
+        const input     = document.getElementById('sig-input-' + fieldName);
+
+        // Responsif: sesuaikan ukuran canvas dengan elemen induknya
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width  = canvas.offsetWidth  * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext('2d').scale(ratio, ratio);
+            if (signaturePads[fieldName]) signaturePads[fieldName].clear();
+        }
+
+        const pad = new SignaturePad(canvas, {
+            backgroundColor: 'rgba(255,255,255,0)',
+            penColor: '#1a1a2e',
+            minWidth: 1.5,
+            maxWidth: 3,
+        });
+        signaturePads[fieldName] = pad;
+
+        // Resize sekali saat init setelah halaman render
+        setTimeout(resizeCanvas, 100);
+        window.addEventListener('resize', resizeCanvas);
+
+        // Update hidden input setiap kali pengguna selesai menggambar
+        canvas.addEventListener('pointerup', () => {
+            if (!pad.isEmpty()) {
+                input.value = pad.toDataURL('image/png');
+                wrapper.classList.add('signed');
+            }
+        });
+    });
+}
+
+function clearSignature(fieldName) {
+    if (signaturePads[fieldName]) {
+        signaturePads[fieldName].clear();
+        document.getElementById('sig-input-' + fieldName).value = '';
+        document.getElementById('sig-wrapper-' + fieldName).classList.remove('signed');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initSignaturePads);
+
 // ==========================================
 // Cascading Kecamatan → Kelurahan
 // ==========================================
@@ -260,7 +404,6 @@ document.querySelectorAll('.field-kecamatan').forEach(function(kecSelect) {
     kecSelect.addEventListener('change', function() {
         const kecId = this.value;
 
-        // Cari semua field-kelurahan di form yang sama
         document.querySelectorAll('.field-kelurahan').forEach(function(kelSelect) {
             kelSelect.innerHTML = '<option value="">-- Memuat... --</option>';
             kelSelect.disabled = true;
@@ -331,6 +474,24 @@ document.querySelectorAll('.berkas-input').forEach(input => {
 document.getElementById('form-seleksi-berkas').addEventListener('submit', function(e) {
     e.preventDefault();
     const form = this;
+
+    // Pastikan nilai signature sudah diambil dari canvas (jika pointer up terlewat)
+    let sigError = null;
+    document.querySelectorAll('.signature-hidden-input').forEach(inp => {
+        const fn = inp.dataset.field;
+        if (signaturePads[fn] && !signaturePads[fn].isEmpty() && !inp.value) {
+            inp.value = signaturePads[fn].toDataURL('image/png');
+        }
+        if (inp.required && !inp.value) {
+            sigError = 'Kolom tanda tangan wajib diisi. Silakan tanda tangani terlebih dahulu.';
+        }
+    });
+
+    if (sigError) {
+        Swal.fire({ icon: 'warning', title: 'Tanda Tangan Diperlukan', text: sigError, confirmButtonColor: '#2A9D8F' });
+        return;
+    }
+
     Swal.fire({
         title: 'Kirim Pengajuan?',
         html: 'Kode tiket akan dikirimkan ke nomor WhatsApp yang Anda masukkan.<br><small class="text-muted">Pastikan nomor WA aktif dan benar.</small>',
@@ -355,4 +516,5 @@ document.getElementById('form-seleksi-berkas').addEventListener('submit', functi
 });
 </script>
 @endpush
+
 

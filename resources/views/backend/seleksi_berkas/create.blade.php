@@ -196,18 +196,21 @@ document.getElementById('btn-add-field').addEventListener('click', function() {
                 <label class="form-label small fw-bold mb-1">Nama (key)</label>
                 <input type="text" class="form-control form-control-sm field-name" placeholder="nomor_ktp" required>
             </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-bold mb-1">Tipe</label>
-                <select class="form-select form-select-sm field-type">
-                    <option value="text">Teks</option>
-                    <option value="number">Angka</option>
-                    <option value="date">Tanggal</option>
-                    <option value="textarea">Textarea</option>
-                    <option value="email">Email</option>
-                    <option value="kecamatan">🗺️ Kecamatan</option>
-                    <option value="kelurahan">🏘️ Kelurahan</option>
-                </select>
-            </div>
+                <div class="col-md-2">
+                 <label class="form-label small fw-bold mb-1">Tipe</label>
+                 <select class="form-select form-select-sm field-type" onchange="onFieldTypeChange(this)">
+                     <option value="text">Teks</option>
+                     <option value="number">Angka</option>
+                     <option value="date">Tanggal</option>
+                     <option value="textarea">Textarea</option>
+                     <option value="email">Email</option>
+                     <option value="select">📌 Select / Dropdown</option>
+                     <option value="checkbox">☑️ Checkbox</option>
+                     <option value="signature">✍️ Tanda Tangan</option>
+                     <option value="kecamatan">🗺️ Kecamatan</option>
+                     <option value="kelurahan">🏘️ Kelurahan</option>
+                 </select>
+             </div>
             <div class="col-md-2">
                 <label class="form-label small fw-bold mb-1">Wajib?</label>
                 <div class="form-check mt-1">
@@ -231,6 +234,32 @@ document.getElementById('btn-add-field').addEventListener('click', function() {
             .replace(/\s+/g, '_');
     });
 });
+
+function onFieldTypeChange(select) {
+    const card = select.closest('.field-card');
+    let optionsRow = card.querySelector('.checkbox-options-row');
+    if (select.value === 'checkbox' || select.value === 'select') {
+        if (!optionsRow) {
+            optionsRow = document.createElement('div');
+            optionsRow.className = 'row g-2 mt-1 checkbox-options-row';
+            card.querySelector('.row').insertAdjacentElement('afterend', optionsRow);
+        }
+        const isSelect = select.value === 'select';
+        optionsRow.innerHTML = `
+            <div class="col-12">
+                <label class="form-label small fw-bold mb-1">
+                    ${isSelect ? 'Opsi Dropdown' : 'Opsi Checkbox'}
+                    <small class="text-muted fw-normal">(pisahkan dengan koma)</small>
+                </label>
+                <input type="text" class="form-control form-control-sm field-options"
+                       placeholder="${isSelect ? 'Opsi A, Opsi B, Opsi C' : 'Pilihan 1, Pilihan 2, Pilihan 3'}">
+            </div>
+        `;
+        optionsRow.style.display = '';
+    } else if (optionsRow) {
+        optionsRow.style.display = 'none';
+    }
+}
 
 function removeField(btn) {
     btn.closest('.field-card').remove();
@@ -286,12 +315,16 @@ document.getElementById('form-seleksi').addEventListener('submit', function(e) {
     // Serialize fields
     const fields = [];
     fieldContainer.querySelectorAll('.field-card').forEach(card => {
-        const label = card.querySelector('.field-label').value.trim();
-        const name  = card.querySelector('.field-name').value.trim();
-        const type  = card.querySelector('.field-type').value;
-        const req   = card.querySelector('.field-required').checked;
+        const label   = card.querySelector('.field-label').value.trim();
+        const name    = card.querySelector('.field-name').value.trim();
+        const type    = card.querySelector('.field-type').value;
+        const req     = card.querySelector('.field-required').checked;
+        const optEl   = card.querySelector('.field-options');
+        const options = (optEl && (type === 'checkbox' || type === 'select'))
+            ? optEl.value.split(',').map(s => s.trim()).filter(Boolean)
+            : [];
         if (label && name) {
-            fields.push({ label, name, type, required: req });
+            fields.push({ label, name, type, required: req, options });
         }
     });
     document.getElementById('field_configs_input').value = JSON.stringify(fields);

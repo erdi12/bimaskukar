@@ -61,6 +61,22 @@ class PengajuanBerkasController extends Controller
                 $fieldRules[$fieldName] = empty($field['required']) ? 'nullable|exists:kelurahans,id' : 'required|exists:kelurahans,id';
                 continue;
             }
+            // Checkbox: array of strings
+            if ($type === 'checkbox') {
+                $fieldRules[$fieldName]       = empty($field['required']) ? 'nullable|array' : 'required|array';
+                $fieldRules[$fieldName . '.*'] = 'string|max:255';
+                continue;
+            }
+            // Signature: base64 string (bisa panjang)
+            if ($type === 'signature') {
+                $fieldRules[$fieldName] = empty($field['required']) ? 'nullable|string' : 'required|string';
+                continue;
+            }
+            // Select: string satu pilihan
+            if ($type === 'select') {
+                $fieldRules[$fieldName] = empty($field['required']) ? 'nullable|string|max:255' : 'required|string|max:255';
+                continue;
+            }
 
             $rules = [];
             if (! empty($field['required'])) {
@@ -106,21 +122,39 @@ class PengajuanBerkasController extends Controller
                 $kec = Kecamatan::find($request->input($fieldName));
                 $dataIsian[$field['name']] = [
                     'label' => $field['label'],
+                    'type'  => $type,
                     'value' => $kec ? $kec->kecamatan : $request->input($fieldName),
                 ];
             } elseif ($type === 'kelurahan') {
                 $kel = Kelurahan::find($request->input($fieldName));
                 $dataIsian[$field['name']] = [
                     'label' => $field['label'],
+                    'type'  => $type,
                     'value' => $kel ? $kel->nama_kelurahan : $request->input($fieldName),
+                ];
+            } elseif ($type === 'checkbox') {
+                // Checkbox: simpan sebagai array pilihan yang dicentang
+                $dataIsian[$field['name']] = [
+                    'label' => $field['label'],
+                    'type'  => $type,
+                    'value' => (array) $request->input($fieldName, []),
+                ];
+            } elseif ($type === 'signature') {
+                // Signature: simpan base64 image string apa adanya
+                $dataIsian[$field['name']] = [
+                    'label' => $field['label'],
+                    'type'  => $type,
+                    'value' => $request->input($fieldName, ''),
                 ];
             } else {
                 $dataIsian[$field['name']] = [
                     'label' => $field['label'],
+                    'type'  => $type,
                     'value' => $request->input($fieldName),
                 ];
             }
         }
+
 
         // Upload berkas
         $berkasFiles = [];

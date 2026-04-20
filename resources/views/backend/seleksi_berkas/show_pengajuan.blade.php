@@ -68,12 +68,49 @@
 
                         @if($pengajuan->data_isian)
                             @foreach($pengajuan->data_isian as $key => $field)
-                                <div class="col-md-6">
-                                    <label class="text-muted small text-uppercase fw-bold">{{ $field['label'] ?? $key }}</label>
-                                    <div class="fw-semibold text-dark">{{ $field['value'] ?? '-' }}</div>
-                                </div>
+                                @php
+                                    $fVal  = $field['value'] ?? '-';
+                                    $fType = $field['type'] ?? 'text';
+                                @endphp
+                                @if($fType === 'signature')
+                                    {{-- Tanda tangan: tampilkan full-width --}}
+                                    <div class="col-12">
+                                        <label class="text-muted small text-uppercase fw-bold">{{ $field['label'] ?? $key }}</label>
+                                        @if($fVal && $fVal !== '-' && str_starts_with($fVal, 'data:image'))
+                                            <div class="border rounded-3 p-2 bg-light d-inline-block mt-1">
+                                                <img src="{{ $fVal }}" alt="Tanda Tangan" style="max-height:120px; max-width:100%; display:block;">
+                                            </div>
+                                        @else
+                                            <div class="fw-semibold text-muted fst-italic">Tidak ada tanda tangan</div>
+                                        @endif
+                                    </div>
+                                @elseif($fType === 'checkbox' && is_array($fVal))
+                                    {{-- Checkbox multi-pilih --}}
+                                    <div class="col-md-6">
+                                        <label class="text-muted small text-uppercase fw-bold">{{ $field['label'] ?? $key }}</label>
+                                        <div class="mt-1 d-flex flex-wrap gap-1">
+                                            @foreach($fVal as $cbItem)
+                                                <span class="badge bg-success rounded-pill px-2 py-1">
+                                                    <i class="fas fa-check me-1"></i>{{ $cbItem }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="col-md-6">
+                                        <label class="text-muted small text-uppercase fw-bold">{{ $field['label'] ?? $key }}</label>
+                                        <div class="fw-semibold text-dark">
+                                            @if(is_array($fVal))
+                                                {{ implode(', ', $fVal) }}
+                                            @else
+                                                {{ $fVal }}
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
                             @endforeach
                         @endif
+
                     </div>
                 </div>
             </div>

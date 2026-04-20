@@ -162,12 +162,15 @@ function buildFieldCard(field, existing = false) {
             </div>
             <div class="col-md-2">
                 <label class="form-label small fw-bold mb-1">Tipe</label>
-                <select class="form-select form-select-sm field-type">
+                <select class="form-select form-select-sm field-type" onchange="onFieldTypeChange(this)">
                     <option value="text" ${(field.type||'text')==='text'?'selected':''}>Teks</option>
                     <option value="number" ${field.type==='number'?'selected':''}>Angka</option>
                     <option value="date" ${field.type==='date'?'selected':''}>Tanggal</option>
                     <option value="textarea" ${field.type==='textarea'?'selected':''}>Textarea</option>
                     <option value="email" ${field.type==='email'?'selected':''}>Email</option>
+                    <option value="select" ${field.type==='select'?'selected':''}>📌 Select / Dropdown</option>
+                    <option value="checkbox" ${field.type==='checkbox'?'selected':''}>☑️ Checkbox</option>
+                    <option value="signature" ${field.type==='signature'?'selected':''}>✍️ Tanda Tangan</option>
                     <option value="kecamatan" ${field.type==='kecamatan'?'selected':''}>🗺️ Kecamatan</option>
                     <option value="kelurahan" ${field.type==='kelurahan'?'selected':''}>🏘️ Kelurahan</option>
                 </select>
@@ -189,6 +192,23 @@ function buildFieldCard(field, existing = false) {
     div.querySelector('.field-label').addEventListener('input', function() {
         div.querySelector('.field-name').value = this.value.toLowerCase().replace(/[^a-z0-9\s_]/g,'').replace(/\s+/g,'_');
     });
+
+    // Jika tipe checkbox atau select dan ada opsi, tampilkan baris opsi
+    if (field.type === 'checkbox' || field.type === 'select') {
+        const optionsRow = document.createElement('div');
+        optionsRow.className = 'row g-2 mt-1 checkbox-options-row';
+        const existingOptions = (field.options || []).join(', ');
+        const labelText = field.type === 'select' ? 'Opsi Dropdown' : 'Opsi Checkbox';
+        const placeholderText = field.type === 'select' ? 'Opsi A, Opsi B, Opsi C' : 'Pilihan 1, Pilihan 2, Pilihan 3';
+        optionsRow.innerHTML = `
+            <div class="col-12">
+                <label class="form-label small fw-bold mb-1">${labelText} <small class="text-muted fw-normal">(pisahkan dengan koma)</small></label>
+                <input type="text" class="form-control form-control-sm field-options" value="${existingOptions}" placeholder="${placeholderText}">
+            </div>
+        `;
+        div.querySelector('.row').insertAdjacentElement('afterend', optionsRow);
+    }
+
     return div;
 }
 
@@ -252,11 +272,15 @@ function removeBerkas(btn) {
 document.getElementById('form-seleksi').addEventListener('submit', function() {
     const fields = [];
     fieldContainer.querySelectorAll('.field-card').forEach(card => {
-        const label = card.querySelector('.field-label').value.trim();
-        const name  = card.querySelector('.field-name').value.trim();
-        const type  = card.querySelector('.field-type').value;
-        const req   = card.querySelector('.field-required').checked;
-        if (label && name) fields.push({ label, name, type, required: req });
+        const label   = card.querySelector('.field-label').value.trim();
+        const name    = card.querySelector('.field-name').value.trim();
+        const type    = card.querySelector('.field-type').value;
+        const req     = card.querySelector('.field-required').checked;
+        const optEl   = card.querySelector('.field-options');
+        const options = (optEl && (type === 'checkbox' || type === 'select'))
+            ? optEl.value.split(',').map(s => s.trim()).filter(Boolean)
+            : [];
+        if (label && name) fields.push({ label, name, type, required: req, options });
     });
     document.getElementById('field_configs_input').value = JSON.stringify(fields);
 
@@ -269,5 +293,31 @@ document.getElementById('form-seleksi').addEventListener('submit', function() {
     });
     document.getElementById('berkas_configs_input').value = JSON.stringify(berkas);
 });
+
+function onFieldTypeChange(select) {
+    const card = select.closest('.field-card');
+    let optionsRow = card.querySelector('.checkbox-options-row');
+    if (select.value === 'checkbox' || select.value === 'select') {
+        if (!optionsRow) {
+            optionsRow = document.createElement('div');
+            optionsRow.className = 'row g-2 mt-1 checkbox-options-row';
+            card.querySelector('.row').insertAdjacentElement('afterend', optionsRow);
+        }
+        const isSelect = select.value === 'select';
+        optionsRow.innerHTML = `
+            <div class="col-12">
+                <label class="form-label small fw-bold mb-1">
+                    ${isSelect ? 'Opsi Dropdown' : 'Opsi Checkbox'}
+                    <small class="text-muted fw-normal">(pisahkan dengan koma)</small>
+                </label>
+                <input type="text" class="form-control form-control-sm field-options"
+                       placeholder="${isSelect ? 'Opsi A, Opsi B, Opsi C' : 'Pilihan 1, Pilihan 2, Pilihan 3'}">
+            </div>
+        `;
+        optionsRow.style.display = '';
+    } else if (optionsRow) {
+        optionsRow.style.display = 'none';
+    }
+}
 </script>
 @endpush
