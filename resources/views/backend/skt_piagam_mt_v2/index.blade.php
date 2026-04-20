@@ -59,10 +59,10 @@
                                             data-bs-toggle="modal" data-bs-target="#importExcelModal">
                                             <i class="fas fa-file-excel me-2"></i>Import Excel
                                         </button>
-                                        <a href="{{ route('skt_piagam_mt_v2.export') }}"
-                                            class="btn btn-outline-info rounded-pill w-100 w-md-auto">
+                                        <button type="button" class="btn btn-outline-info rounded-pill w-100 w-md-auto"
+                                            data-bs-toggle="modal" data-bs-target="#exportExcelModal">
                                             <i class="fas fa-download me-2"></i>Export Excel
-                                        </a>
+                                        </button>
                                         <a href="{{ route('skt_piagam_mt_v2.create') }}"
                                             class="btn btn-primary rounded-pill w-100 w-md-auto">
                                             <i class="fas fa-plus me-2"></i>Tambah Data
@@ -179,6 +179,46 @@
                         {{-- Pagination --}}
                         {{-- Pagination otomatis dari DataTables --}}
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Export Excel dengan Filter Tanggal -->
+    <div class="modal fade" id="exportExcelModal" tabindex="-1" aria-labelledby="exportExcelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="exportExcelModalLabel">
+                        <i class="fas fa-file-excel me-2"></i>Export Data Majelis Ta'lim
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Filter berdasarkan tanggal mendaftar. Kosongkan untuk mengekspor semua data.
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label for="export_start_date" class="form-label fw-semibold">Tanggal Awal</label>
+                            <input type="date" class="form-control" id="export_start_date" placeholder="Tanggal Awal">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="export_end_date" class="form-label fw-semibold">Tanggal Akhir</label>
+                            <input type="date" class="form-control" id="export_end_date" placeholder="Tanggal Akhir">
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Jika kedua tanggal dikosongkan, <strong>semua data</strong> akan diekspor.
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-info text-white" id="btnDoExport">
+                        <i class="fas fa-download me-1"></i>Export Excel
+                    </button>
                 </div>
             </div>
         </div>
@@ -453,6 +493,34 @@
                 theme: 'bootstrap-5',
                 placeholder: "Pilih Kelurahan",
                 allowClear: true
+            });
+
+            // Handler tombol Export Excel (di dalam modal)
+            $('#btnDoExport').on('click', function() {
+                const startDate = $('#export_start_date').val();
+                const endDate   = $('#export_end_date').val();
+
+                // Validasi: jika tanggal awal > tanggal akhir
+                if (startDate && endDate && startDate > endDate) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Perhatian',
+                        text: 'Tanggal awal tidak boleh lebih besar dari tanggal akhir.',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+
+                // Bangun URL export dengan query string
+                let url = "{{ route('skt_piagam_mt_v2.export') }}";
+                const params = new URLSearchParams();
+                if (startDate) params.append('start_date', startDate);
+                if (endDate)   params.append('end_date', endDate);
+                if (params.toString()) url += '?' + params.toString();
+
+                // Tutup modal lalu trigger download
+                $('#exportExcelModal').modal('hide');
+                window.location.href = url;
             });
         });
 

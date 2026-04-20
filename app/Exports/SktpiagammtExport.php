@@ -10,12 +10,34 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class SktpiagammtExport implements FromCollection, WithHeadings, WithMapping
 {
+    protected $startDate;
+    protected $endDate;
+
+    /**
+     * @param string|null $startDate
+     * @param string|null $endDate
+     */
+    public function __construct($startDate = null, $endDate = null)
+    {
+        $this->startDate = $startDate;
+        $this->endDate   = $endDate;
+    }
+
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection()
     {
-        return Sktpiagammt::with(['kecamatan', 'kelurahan'])->get();
+        $query = Sktpiagammt::with(['kecamatan', 'kelurahan']);
+
+        if ($this->startDate) {
+            $query->whereDate('mendaftar', '>=', $this->startDate);
+        }
+        if ($this->endDate) {
+            $query->whereDate('mendaftar', '<=', $this->endDate);
+        }
+
+        return $query->orderBy('mendaftar', 'desc')->get();
     }
 
     /**

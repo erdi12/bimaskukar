@@ -657,10 +657,26 @@ class SktpiagammtV2Controller extends Controller
     }
 
     /**
-     * Export data to Excel
+     * Export data to Excel (dengan filter tanggal mendaftar opsional)
      */
-    public function export()
+    public function export(Request $request)
     {
-        return Excel::download(new SktpiagammtExport, 'data_majelis_taklim_'.date('Y-m-d_H-i-s').'.xlsx');
+        $startDate = $request->input('start_date');
+        $endDate   = $request->input('end_date');
+
+        // Buat nama file dinamis berdasarkan filter
+        if ($startDate && $endDate) {
+            $suffix = "_{$startDate}_sd_{$endDate}";
+        } elseif ($startDate) {
+            $suffix = "_dari_{$startDate}";
+        } elseif ($endDate) {
+            $suffix = "_sd_{$endDate}";
+        } else {
+            $suffix = '_semua';
+        }
+
+        $filename = 'data_majelis_taklim' . $suffix . '_' . date('Ymd_His') . '.xlsx';
+
+        return Excel::download(new SktpiagammtExport($startDate, $endDate), $filename);
     }
 }
