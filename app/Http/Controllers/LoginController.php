@@ -18,6 +18,12 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            // Mencegah redirect ke URL ajax/polling jika session expired
+            $intendedUrl = session()->get('url.intended');
+            if ($intendedUrl && str_contains($intendedUrl, '/notifications/')) {
+                session()->forget('url.intended');
+            }
+
             return redirect()->intended(route('dashboard_v2'));
         }
 
