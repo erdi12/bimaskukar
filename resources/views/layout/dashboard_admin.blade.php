@@ -22,8 +22,17 @@
     }
 </style>
 <div class="content">
-    <div class="page-title">
-        <h3>Dashboard</h3>
+    <h1>Dashboard</h1>
+    <div class="card border-0 shadow-sm mb-4 mt-4" style="background: linear-gradient(135deg, rgba(25, 135, 84, 0.1) 0%, rgba(25, 135, 84, 0.02) 100%); min-height: 120px;">
+        <div class="card-body p-4 position-relative d-flex align-items-center">
+            <div class="z-1" style="max-width: 75%;">
+                <h3 class="fw-bold text-success mb-2">Selamat Datang, {{ Auth::user()->name ?? 'Admin' }}! 👋</h3>
+                <p class="text-muted mb-0">Semoga hari Anda menyenangkan. Berikut adalah ringkasan data sistem saat ini.</p>
+            </div>
+            <div class="d-none d-md-block position-absolute end-0 top-50 translate-middle-y z-1 pe-4 pointer-events-none">
+                <lottie-player src="{{ asset('Hand_drawn_salam.json') }}" background="transparent" speed="1" style="width: 160px; height: 160px; pointer-events: none;" loop autoplay></lottie-player>
+            </div>
+        </div>
     </div>
 
     <!-- Real data provided by DashboardController@v2 -->
