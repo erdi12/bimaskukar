@@ -70,8 +70,9 @@ class FrontendController extends Controller
         }
 
         // Append query params to pagination links
+        $sort = $request->query('sort');
         if ($data) {
-            $data->appends(['tab' => $tab, 'search' => $search]);
+            $data->appends(array_filter(['tab' => $tab, 'search' => $search, 'sort' => $sort]));
         }
 
         // Get Totals for Dashboard
@@ -87,14 +88,22 @@ class FrontendController extends Controller
             $sortColumn = 'mushalla_count';
         }
 
-        // Get Summary per Kecamatan
-        $kecamatanSummary = \App\Models\Kecamatan::withCount([
+        $queryKecamatan = \App\Models\Kecamatan::withCount([
             'sktpiagammts as majelis_count',
             'masjids as masjid_count',
             'mushallas as mushalla_count'
-        ])->orderByDesc($sortColumn)->get();
+        ]);
 
-        return view('frontend.data_keagamaan', compact('data', 'tab', 'search', 'totalMajelis', 'totalMasjid', 'totalMushalla', 'kecamatanSummary'));
+        if ($sort === 'total') {
+            $queryKecamatan->orderByRaw('(majelis_count + masjid_count + mushalla_count) DESC');
+        } else {
+            $queryKecamatan->orderByDesc($sortColumn);
+        }
+
+        // Get Summary per Kecamatan
+        $kecamatanSummary = $queryKecamatan->get();
+
+        return view('frontend.data_keagamaan', compact('data', 'tab', 'search', 'sort', 'totalMajelis', 'totalMasjid', 'totalMushalla', 'kecamatanSummary'));
     }
 
     public function agendaKegiatan(Request $request)

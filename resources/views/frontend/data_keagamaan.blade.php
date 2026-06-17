@@ -61,9 +61,17 @@
             <div class="mb-5" data-aos="fade-up" data-aos-delay="400">
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h4 class="fw-bold text-dark mb-0">Rekapan Data Wilayah</h4>
-                    <span class="badge bg-primary-subtle-custom text-primary-custom px-3 py-2 rounded-pill">
-                        {{ count($kecamatanSummary) }} Kecamatan
-                    </span>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{{ route('data_keagamaan', array_filter(['tab' => $tab, 'search' => $search, 'sort' => (isset($sort) && $sort === 'total') ? null : 'total'])) }}" 
+                           class="btn btn-sm {{ (isset($sort) && $sort === 'total') ? 'btn-primary-custom' : 'btn-outline-primary' }} rounded-pill d-flex align-items-center"
+                           title="Urutkan berdasarkan jumlah keseluruhan">
+                            <i class="fas {{ (isset($sort) && $sort === 'total') ? 'fa-check' : 'fa-sort-amount-down' }} me-2"></i> 
+                            Urutkan Total
+                        </a>
+                        <span class="badge bg-primary-subtle-custom text-primary-custom px-3 py-2 rounded-pill">
+                            {{ count($kecamatanSummary) }} Kecamatan
+                        </span>
+                    </div>
                 </div>
 
                 <div class="card border-0 shadow-sm overflow-hidden">
