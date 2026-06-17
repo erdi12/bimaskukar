@@ -79,12 +79,20 @@ class FrontendController extends Controller
         $totalMasjid = \App\Models\SktMasjid::count();
         $totalMushalla = \App\Models\SktMushalla::count();
 
+        // Determine sort column based on active tab
+        $sortColumn = 'majelis_count';
+        if ($tab == 'masjid') {
+            $sortColumn = 'masjid_count';
+        } elseif ($tab == 'mushalla') {
+            $sortColumn = 'mushalla_count';
+        }
+
         // Get Summary per Kecamatan
         $kecamatanSummary = \App\Models\Kecamatan::withCount([
             'sktpiagammts as majelis_count',
             'masjids as masjid_count',
             'mushallas as mushalla_count'
-        ])->orderBy('kecamatan')->get();
+        ])->orderByDesc($sortColumn)->get();
 
         return view('frontend.data_keagamaan', compact('data', 'tab', 'search', 'totalMajelis', 'totalMasjid', 'totalMushalla', 'kecamatanSummary'));
     }
