@@ -170,6 +170,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/skt-piagam-mt-v2/rekap', [\App\Http\Controllers\SktpiagammtV2Controller::class, 'rekap'])->name('skt_piagam_mt_v2.rekap');
         Route::get('/skt-piagam-mt-v2/trash', [\App\Http\Controllers\SktpiagammtV2Controller::class, 'trash'])->name('skt_piagam_mt_v2.trash');
         Route::get('/skt-piagam-mt-v2/export', [\App\Http\Controllers\SktpiagammtV2Controller::class, 'export'])->name('skt_piagam_mt_v2.export');
+        Route::get('/skt-piagam-mt-v2/download-skt-files', [\App\Http\Controllers\SktpiagammtV2Controller::class, 'downloadSktFiles'])->name('skt_piagam_mt_v2.download_skt_files');
         Route::get('/skt-piagam-mt-v2/{skt_piagam_mt}', [\App\Http\Controllers\SktpiagammtV2Controller::class, 'show'])->name('skt_piagam_mt_v2.show');
 
         // Masjid (Read Only)
@@ -218,6 +219,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Admin,Editor,Operator'])->group(function () {
         Route::post('/skt-piagam-mt/import', [SktpiagammtController::class, 'import'])->name('skt_piagam_mt.import');
         Route::get('/skt-piagam-mt/export', [SktpiagammtController::class, 'export'])->name('skt_piagam_mt.export');
+        Route::get('/skt-piagam-mt/download-skt-files', [SktpiagammtController::class, 'downloadSktFiles'])->name('skt_piagam_mt.download_skt_files');
         Route::get('/skt-piagam-mt/template', [SktpiagammtController::class, 'downloadTemplate'])->name('skt_piagam_mt.template');
     });
 

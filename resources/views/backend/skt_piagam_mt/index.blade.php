@@ -56,9 +56,12 @@
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importExcelModal">
                                     <i data-feather="file-text"></i> <span class="d-none d-sm-inline">Import Excel</span>
                                 </button>
-                                <a href="{{ route('skt_piagam_mt.export') }}" class="btn btn-info">
-                                    <i data-feather="download"></i> <span class="d-none d-sm-inline">Export Excel</span>
-                                </a>
+                                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#exportExcelModal">
+                                    <i data-feather="download"></i> <span class="d-none d-sm-inline">Download Excel</span>
+                                </button>
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#downloadSktFilesModal">
+                                    <i data-feather="file"></i> <span class="d-none d-sm-inline">Download File SKT</span>
+                                </button>
                                 <a href="{{ route('skt_piagam_mt.create') }}" class="btn btn-primary">
                                     <i data-feather="plus"></i> <span class="d-none d-sm-inline">Tambah Majelis Ta'lim</span>
                                 </a>
@@ -66,6 +69,83 @@
                                 <a href="{{ route('skt_piagam_mt.rekap') }}" class="btn btn-info">
                                     <i data-feather="file"></i> <span class="d-none d-sm-inline">Rekapan Data</span>
                                 </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Modal Download Excel berdasarkan Periode --}}
+                    <div class="modal fade" id="exportExcelModal" tabindex="-1" aria-labelledby="exportExcelModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-info text-white">
+                                    <h5 class="modal-title" id="exportExcelModalLabel">
+                                        <i data-feather="download" class="me-2"></i>Download Data Majelis Ta'lim
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form action="{{ route('skt_piagam_mt.export') }}" method="GET">
+                                    <div class="modal-body">
+                                        <p class="text-muted small">
+                                            Pilih periode berdasarkan tanggal mendaftar. Kosongkan kedua tanggal untuk mengunduh seluruh data.
+                                        </p>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="export_start_date" class="form-label">Tanggal Awal</label>
+                                                <input type="date" class="form-control" id="export_start_date" name="start_date" value="{{ request('start_date') }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="export_end_date" class="form-label">Tanggal Akhir</label>
+                                                <input type="date" class="form-control" id="export_end_date" name="end_date" value="{{ request('end_date') }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-info text-white">
+                                            <i data-feather="download" class="me-1"></i>Download Excel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Modal Download File SKT berdasarkan Periode --}}
+                    <div class="modal fade" id="downloadSktFilesModal" tabindex="-1" aria-labelledby="downloadSktFilesModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-warning">
+                                    <h5 class="modal-title" id="downloadSktFilesModalLabel">
+                                        <i data-feather="file" class="me-2"></i>Download File SKT
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form action="{{ route('skt_piagam_mt.download_skt_files') }}" method="GET">
+                                    <div class="modal-body">
+                                        <p class="text-muted small">
+                                            File SKT akan diunduh dalam satu arsip ZIP berdasarkan tanggal mendaftar Majelis Taklim.
+                                        </p>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="skt_start_date" class="form-label">Tanggal Awal</label>
+                                                <input type="date" class="form-control" id="skt_start_date" name="start_date">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="skt_end_date" class="form-label">Tanggal Akhir</label>
+                                                <input type="date" class="form-control" id="skt_end_date" name="end_date">
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-info mt-3 mb-0">
+                                            Data tanpa file SKT akan dilewati. Kosongkan kedua tanggal untuk mengunduh semua file SKT.
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-warning">
+                                            <i data-feather="download" class="me-1"></i>Download ZIP
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>

@@ -7,6 +7,7 @@ use App\Models\Kecamatan;
 use App\Models\Kelurahan;
 use App\Models\Sktpiagammt;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -678,5 +679,107 @@ class SktpiagammtV2Controller extends Controller
         $filename = 'data_majelis_taklim' . $suffix . '_' . date('Ymd_His') . '.xlsx';
 
         return Excel::download(new SktpiagammtExport($startDate, $endDate), $filename);
+    }
+
+    /**
+     * Download file SKT Majelis Taklim berdasarkan periode pendaftaran.
+     */
+    public function downloadSktFiles(Request $request)
+    {
+        $validated = $request->validate([
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? null;
+
+        if ($startDate && $endDate && $startDate > $endDate) {
+            return back()
+                ->withInput()
+                ->with('error', 'Tanggal awal tidak boleh lebih besar dari tanggal akhir.');
+        }
+
+        $query = Sktpiagammt::query()
+            ->whereNotNull('file_skt')
+            ->where('file_skt', '!=', '');
+
+        if ($startDate) {
+            $query->whereDate('mendaftar', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->whereDate('mendaftar', '<=', $endDate);
+        }
+
+        $records = $query->orderBy('mendaftar')->get();
+
+        if (! class_exists(\ZipArchive::class)) {
+            Log::error('Download file SKT V2 gagal: ekstensi ZIP PHP tidak tersedia.');
+
+            return back()->with('error', 'Fitur download file SKT belum tersedia di server.');
+        }
+
+        $zipPath = tempnam(storage_path('app'), 'skt_');
+        $zip = new \ZipArchive();
+
+        if ($zipPath === false || $zip->open($zipPath, \ZipArchive::OVERWRITE) !== true) {
+            if ($zipPath !== false && file_exists($zipPath)) {
+                unlink($zipPath);
+            }
+
+            Log::error('Download file SKT V2 gagal: tidak dapat membuat arsip ZIP.');
+
+            return back()->with('error', 'Arsip file SKT tidak dapat dibuat. Silakan coba lagi.');
+        }
+
+        $addedFiles = 0;
+        $usedNames = [];
+        $storage = Storage::disk('public');
+
+        foreach ($records as $record) {
+            $relativePath = self::UPLOAD_PATH['skt'].'/'.basename($record->file_skt);
+
+            if (! $storage->exists($relativePath)) {
+                Log::warning('File SKT V2 tidak ditemukan saat download.', [
+                    'skt_id' => $record->id,
+                    'file' => $record->file_skt,
+                ]);
+                continue;
+            }
+
+            $baseName = preg_replace(
+                '/[^A-Za-z0-9._-]/',
+                '_',
+                trim(($record->nomor_statistik ?: $record->id).'_'.$record->nama_majelis)
+            );
+            $baseName = trim($baseName, '._-') ?: 'majelis_taklim_'.$record->id;
+            $zipName = $baseName.'.pdf';
+
+            if (isset($usedNames[$zipName])) {
+                $usedNames[$zipName]++;
+                $zipName = $baseName.'_'.$usedNames[$zipName].'.pdf';
+            } else {
+                $usedNames[$zipName] = 0;
+            }
+
+            $zip->addFile($storage->path($relativePath), $zipName);
+            $addedFiles++;
+        }
+
+        $zip->close();
+
+        if ($addedFiles === 0) {
+            unlink($zipPath);
+
+            return back()->with('error', 'Tidak ada file SKT yang tersedia pada periode tersebut.');
+        }
+
+        $suffix = $startDate && $endDate
+            ? "_{$startDate}_sd_{$endDate}"
+            : ($startDate ? "_dari_{$startDate}" : ($endDate ? "_sd_{$endDate}" : '_semua'));
+
+        return response()
+            ->download($zipPath, 'file_skt_majelis_taklim'.$suffix.'_'.date('Ymd_His').'.zip')
+            ->deleteFileAfterSend(true);
     }
 }

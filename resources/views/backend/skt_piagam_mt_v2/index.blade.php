@@ -63,6 +63,10 @@
                                             data-bs-toggle="modal" data-bs-target="#exportExcelModal">
                                             <i class="fas fa-download me-2"></i>Export Excel
                                         </button>
+                                        <button type="button" class="btn btn-outline-warning rounded-pill w-100 w-md-auto"
+                                            data-bs-toggle="modal" data-bs-target="#downloadSktFilesModal">
+                                            <i class="fas fa-file-pdf me-2"></i>Download File SKT
+                                        </button>
                                         <a href="{{ route('skt_piagam_mt_v2.create') }}"
                                             class="btn btn-primary rounded-pill w-100 w-md-auto">
                                             <i class="fas fa-plus me-2"></i>Tambah Data
@@ -180,6 +184,47 @@
                         {{-- Pagination otomatis dari DataTables --}}
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Download File SKT dengan Filter Tanggal -->
+    <div class="modal fade" id="downloadSktFilesModal" tabindex="-1" aria-labelledby="downloadSktFilesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="downloadSktFilesModalLabel">
+                        <i class="fas fa-file-pdf me-2"></i>Download File SKT
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('skt_piagam_mt_v2.download_skt_files') }}" method="GET">
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">
+                            File SKT akan diunduh dalam satu arsip ZIP berdasarkan tanggal mendaftar Majelis Taklim.
+                        </p>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="skt_start_date" class="form-label fw-semibold">Tanggal Awal</label>
+                                <input type="date" class="form-control" id="skt_start_date" name="start_date">
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="skt_end_date" class="form-label fw-semibold">Tanggal Akhir</label>
+                                <input type="date" class="form-control" id="skt_end_date" name="end_date">
+                            </div>
+                        </div>
+                        <div class="alert alert-info mt-3 mb-0">
+                            Data tanpa file SKT akan dilewati. Kosongkan kedua tanggal untuk mengunduh semua file SKT.
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-download me-1"></i>Download ZIP
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

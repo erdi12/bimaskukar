@@ -866,9 +866,137 @@ class SktpiagammtController extends Controller
     /**
      * Export data ke Excel
      */
-    public function export()
+    public function export(Request $request)
     {
-        return Excel::download(new \App\Exports\SktpiagammtExport, 'majelis_talim.xlsx');
+        $validated = $request->validate([
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? null;
+
+        if ($startDate && $endDate && $startDate > $endDate) {
+            return back()
+                ->withInput()
+                ->with('error', 'Tanggal awal tidak boleh lebih besar dari tanggal akhir.');
+        }
+
+        if ($startDate && $endDate) {
+            $suffix = "_{$startDate}_sd_{$endDate}";
+        } elseif ($startDate) {
+            $suffix = "_dari_{$startDate}";
+        } elseif ($endDate) {
+            $suffix = "_sd_{$endDate}";
+        } else {
+            $suffix = '_semua';
+        }
+
+        return Excel::download(
+            new \App\Exports\SktpiagammtExport($startDate, $endDate),
+            'data_majelis_taklim'.$suffix.'_'.date('Ymd_His').'.xlsx'
+        );
+    }
+
+    /**
+     * Download file SKT Majelis Taklim berdasarkan periode pendaftaran.
+     */
+    public function downloadSktFiles(Request $request)
+    {
+        $validated = $request->validate([
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? null;
+
+        if ($startDate && $endDate && $startDate > $endDate) {
+            return back()
+                ->withInput()
+                ->with('error', 'Tanggal awal tidak boleh lebih besar dari tanggal akhir.');
+        }
+
+        $query = Sktpiagammt::query()
+            ->whereNotNull('file_skt')
+            ->where('file_skt', '!=', '');
+
+        if ($startDate) {
+            $query->whereDate('mendaftar', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->whereDate('mendaftar', '<=', $endDate);
+        }
+
+        $records = $query->orderBy('mendaftar')->get();
+        $sktPath = storage_path(self::UPLOAD_PATH['skt']);
+        if (! class_exists(\ZipArchive::class)) {
+            Log::error('Download file SKT gagal: ekstensi ZIP PHP tidak tersedia.');
+
+            return back()->with('error', 'Fitur download file SKT belum tersedia di server.');
+        }
+
+        $zipPath = tempnam(storage_path('app'), 'skt_');
+        $zip = new \ZipArchive();
+
+        if ($zipPath === false || $zip->open($zipPath, \ZipArchive::OVERWRITE) !== true) {
+            if ($zipPath !== false && file_exists($zipPath)) {
+                unlink($zipPath);
+            }
+
+            Log::error('Download file SKT gagal: tidak dapat membuat arsip ZIP.');
+
+            return back()->with('error', 'Arsip file SKT tidak dapat dibuat. Silakan coba lagi.');
+        }
+
+        $addedFiles = 0;
+        $usedNames = [];
+
+        foreach ($records as $record) {
+            $filePath = $sktPath.'/'.basename($record->file_skt);
+
+            if (! is_file($filePath)) {
+                Log::warning('File SKT tidak ditemukan saat download.', [
+                    'skt_id' => $record->id,
+                    'file' => $record->file_skt,
+                ]);
+                continue;
+            }
+
+            $baseName = preg_replace(
+                '/[^A-Za-z0-9._-]/',
+                '_',
+                trim(($record->nomor_statistik ?: $record->id).'_'.$record->nama_majelis)
+            );
+            $baseName = trim($baseName, '._-') ?: 'majelis_taklim_'.$record->id;
+            $zipName = $baseName.'.pdf';
+
+            if (isset($usedNames[$zipName])) {
+                $usedNames[$zipName]++;
+                $zipName = $baseName.'_'.$usedNames[$zipName].'.pdf';
+            } else {
+                $usedNames[$zipName] = 0;
+            }
+
+            $zip->addFile($filePath, $zipName);
+            $addedFiles++;
+        }
+
+        $zip->close();
+
+        if ($addedFiles === 0) {
+            unlink($zipPath);
+
+            return back()->with('error', 'Tidak ada file SKT yang tersedia pada periode tersebut.');
+        }
+
+        $suffix = $startDate && $endDate
+            ? "_{$startDate}_sd_{$endDate}"
+            : ($startDate ? "_dari_{$startDate}" : ($endDate ? "_sd_{$endDate}" : '_semua'));
+
+        return response()
+            ->download($zipPath, 'file_skt_majelis_taklim'.$suffix.'_'.date('Ymd_His').'.zip')
+            ->deleteFileAfterSend(true);
     }
 
     /**
