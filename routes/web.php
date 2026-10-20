@@ -93,6 +93,12 @@ Route::middleware(['auth'])->group(function () {
     */
     Route::middleware(['role:Admin,Editor,Operator'])->group(function () {
 
+        // Inventaris aset
+        Route::post('appv2/aset/kategori', [\App\Http\Controllers\AsetController::class, 'storeCategory'])->name('aset.categories.store');
+        Route::put('appv2/aset/kategori/{category}', [\App\Http\Controllers\AsetController::class, 'updateCategory'])->name('aset.categories.update');
+        Route::delete('appv2/aset/kategori/{category}', [\App\Http\Controllers\AsetController::class, 'destroyCategory'])->name('aset.categories.destroy');
+        Route::resource('appv2/aset', \App\Http\Controllers\AsetController::class)->names('aset')->except(['index', 'show']);
+
         // SKT Piagam MT V2 (Write)
         Route::get('/skt-piagam-mt-v2/create', [\App\Http\Controllers\SktpiagammtV2Controller::class, 'create'])->name('skt_piagam_mt_v2.create');
         Route::post('/skt-piagam-mt-v2', [\App\Http\Controllers\SktpiagammtV2Controller::class, 'store'])->name('skt_piagam_mt_v2.store');
@@ -164,6 +170,12 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:Admin,Editor,Operator,Viewer'])->group(function () {
+
+        // Inventaris aset (read only)
+        Route::get('appv2/aset/kategori', [\App\Http\Controllers\AsetController::class, 'categories'])->name('aset.categories');
+        Route::get('appv2/aset/export', [\App\Http\Controllers\AsetController::class, 'export'])->name('aset.export');
+        Route::get('appv2/aset', [\App\Http\Controllers\AsetController::class, 'index'])->name('aset.index');
+        Route::get('appv2/aset/{aset}', [\App\Http\Controllers\AsetController::class, 'show'])->name('aset.show');
 
         // SKT Piagam MT V2 (Read Only)
         Route::get('/skt-piagam-mt-v2', [\App\Http\Controllers\SktpiagammtV2Controller::class, 'index'])->name('skt_piagam_mt_v2.index');

@@ -84,6 +84,15 @@
             </a>
         </div>
 
+        @if (auth()->check() && auth()->user()->hasAnyRole(['Admin', 'Editor', 'Operator', 'Viewer']))
+            <div class="menu-item @yield('aset')" data-tooltip="Inventaris Aset">
+                <a href="{{ route('aset.index') }}" class="menu-link">
+                    <i class="fas fa-boxes-stacked"></i>
+                    <span>Inventaris Aset</span>
+                </a>
+            </div>
+        @endif
+
         {{-- Layanan --}}
         <div class="sidebar-title">Layanan</div>
         <div class="menu-item @yield('sub-layanan')" data-tooltip="Layanan">
