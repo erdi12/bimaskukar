@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -31,5 +32,10 @@ class Aset extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(AsetCategory::class, 'aset_category_id');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(AsetDocument::class);
     }
 }

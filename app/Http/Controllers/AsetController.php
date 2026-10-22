@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Aset;
 use App\Models\AsetCategory;
+use App\Models\AsetDocument;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class AsetController extends Controller
@@ -62,14 +64,16 @@ class AsetController extends Controller
     public function store(Request $request)
     {
         $data = $this->validatedAset($request);
-        Aset::create($data);
+        unset($data['documents']);
+        $aset = Aset::create($data);
+        $this->saveDocuments($request, $aset);
 
-        return redirect()->route('aset.index')->with('success', 'Data aset berhasil ditambahkan.');
+        return redirect()->route('aset.show', $aset)->with('success', 'Data aset berhasil ditambahkan.');
     }
 
     public function show(Aset $aset)
     {
-        $aset->load('category');
+        $aset->load(['category', 'documents']);
         return view('backend.aset.show', compact('aset'));
     }
 
@@ -85,14 +89,53 @@ class AsetController extends Controller
 
     public function update(Request $request, Aset $aset)
     {
-        $aset->update($this->validatedAset($request, $aset));
+        $data = $this->validatedAset($request, $aset);
+        unset($data['documents']);
+        $aset->update($data);
+        $this->saveDocuments($request, $aset);
         return redirect()->route('aset.show', $aset)->with('success', 'Data aset berhasil diperbarui.');
     }
 
     public function destroy(Aset $aset)
     {
+        foreach ($aset->documents as $document) {
+            Storage::disk('local')->delete($document->file_path);
+        }
         $aset->delete();
         return redirect()->route('aset.index')->with('success', 'Data aset berhasil dihapus.');
+    }
+
+    public function downloadDocument(Aset $aset, AsetDocument $document)
+    {
+        $document = $aset->documents()->findOrFail($document->id);
+        abort_unless(Storage::disk('local')->exists($document->file_path), 404);
+
+        return Storage::disk('local')->download($document->file_path, $document->original_name);
+    }
+
+    public function previewDocument(Aset $aset, AsetDocument $document)
+    {
+        $document = $aset->documents()->findOrFail($document->id);
+        abort_unless(Storage::disk('local')->exists($document->file_path), 404);
+
+        $previewableTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+        abort_unless(in_array($document->mime_type, $previewableTypes, true), 415, 'Pratinjau tersedia untuk PDF dan gambar JPG/PNG.');
+
+        return Storage::disk('local')->response(
+            $document->file_path,
+            $document->original_name,
+            ['X-Content-Type-Options' => 'nosniff'],
+            'inline'
+        );
+    }
+
+    public function destroyDocument(Aset $aset, AsetDocument $document)
+    {
+        $document = $aset->documents()->findOrFail($document->id);
+        Storage::disk('local')->delete($document->file_path);
+        $document->delete();
+
+        return back()->with('success', 'Dokumen berhasil dihapus.');
     }
 
     public function categories()
@@ -149,6 +192,8 @@ class AsetController extends Controller
             'specifications.*.key' => ['nullable', 'string', 'max:80'],
             'specifications.*.value' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'documents' => ['nullable', 'array', 'max:10'],
+            'documents.*' => ['file', 'mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx', 'max:10240'],
         ]);
 
         $specifications = [];
@@ -161,6 +206,23 @@ class AsetController extends Controller
         }
         $data['specifications'] = $specifications ?: null;
         return $data;
+    }
+
+    private function saveDocuments(Request $request, Aset $aset): void
+    {
+        foreach ($request->file('documents', []) as $file) {
+            $path = $file->store("aset-documents/{$aset->id}", 'local');
+            if ($path === false) {
+                throw new \RuntimeException('Dokumen aset gagal disimpan.');
+            }
+
+            $aset->documents()->create([
+                'original_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+            ]);
+        }
     }
 
     private function filteredAssets(Request $request)

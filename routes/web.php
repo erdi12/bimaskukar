@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Admin,Editor,Operator'])->group(function () {
 
         // Inventaris aset
+        Route::delete('appv2/aset/{aset}/dokumen/{document}', [\App\Http\Controllers\AsetController::class, 'destroyDocument'])->name('aset.documents.destroy');
         Route::post('appv2/aset/kategori', [\App\Http\Controllers\AsetController::class, 'storeCategory'])->name('aset.categories.store');
         Route::put('appv2/aset/kategori/{category}', [\App\Http\Controllers\AsetController::class, 'updateCategory'])->name('aset.categories.update');
         Route::delete('appv2/aset/kategori/{category}', [\App\Http\Controllers\AsetController::class, 'destroyCategory'])->name('aset.categories.destroy');
@@ -174,6 +175,8 @@ Route::middleware(['auth'])->group(function () {
         // Inventaris aset (read only)
         Route::get('appv2/aset/kategori', [\App\Http\Controllers\AsetController::class, 'categories'])->name('aset.categories');
         Route::get('appv2/aset/export', [\App\Http\Controllers\AsetController::class, 'export'])->name('aset.export');
+        Route::get('appv2/aset/{aset}/dokumen/{document}/preview', [\App\Http\Controllers\AsetController::class, 'previewDocument'])->name('aset.documents.preview');
+        Route::get('appv2/aset/{aset}/dokumen/{document}', [\App\Http\Controllers\AsetController::class, 'downloadDocument'])->name('aset.documents.download');
         Route::get('appv2/aset', [\App\Http\Controllers\AsetController::class, 'index'])->name('aset.index');
         Route::get('appv2/aset/{aset}', [\App\Http\Controllers\AsetController::class, 'show'])->name('aset.show');
 
