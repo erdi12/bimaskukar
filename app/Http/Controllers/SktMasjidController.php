@@ -248,7 +248,7 @@ class SktMasjidController extends Controller
                 'additionalImageBase64' => $additionalImageBase64,
                 'nomor_naskah' => $sktMasjid->nomor_id_masjid, // Assuming this is the number
                 'tanggal_naskah' => \Carbon\Carbon::now()->isoFormat('D MMMM Y'),
-                'nama_pengirim' => 'Ariyadi F, S.Ag.',
+                'nama_pengirim' => 'Ariyadi F, S.Ag., M.Pd.',
                 'nip_pengirim' => '19770805 199803 1 003',
                 'jabatan_pengirim' => 'Kepala Kantor Kementerian Agama Kabupaten Kutai Kartanegara',
                 'ttd_pengirim' => 'Ariyadi F, S.Ag.',
@@ -327,7 +327,7 @@ class SktMasjidController extends Controller
                 'additionalImageBase64' => $additionalImageBase64,
                 'nomor_naskah' => $sktMasjid->nomor_id_masjid, // Bisa disesuaikan kalau format nomornya beda
                 'tanggal_naskah' => \Carbon\Carbon::now()->isoFormat('D MMMM Y'),
-                'nama_pengirim' => 'Ariyadi F, S.Ag.',
+                'nama_pengirim' => 'Ariyadi F, S.Ag., M.Pd.',
                 'nip_pengirim' => '19770805 199803 1 003',
                 'jabatan_pengirim' => 'Kepala Kantor Kementerian Agama Kabupaten Kutai Kartanegara',
                 'ttd_pengirim' => 'Ariyadi F, S.Ag.',
